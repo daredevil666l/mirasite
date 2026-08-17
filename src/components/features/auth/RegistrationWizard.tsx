@@ -4,14 +4,15 @@ import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Check, ChevronDown } from "lucide-react";
+import { getAssetPath } from "@/lib/utils";
 
 const CITIZENSHIP_OPTIONS = [
-  { id: "ru", name: "Россия", flag: "/images/flag_ru.png" },
-  { id: "uz", name: "Узбекистан", flag: "/images/flag_uz.png" },
-  { id: "tj", name: "Таджикистан", flag: "/images/flag_tj.png" },
-  { id: "kg", name: "Кыргызстан", flag: "/images/flag_kg.png" },
-  { id: "by", name: "Беларусь", flag: "/images/flag_by.png" },
-  { id: "cn", name: "Китай", flag: "/images/flag_cn.png" },
+  { id: "ru", name: "Россия", flag: getAssetPath("/images/flag_ru.png") },
+  { id: "uz", name: "Узбекистан", flag: getAssetPath("/images/flag_uz.png") },
+  { id: "tj", name: "Таджикистан", flag: getAssetPath("/images/flag_tj.png") },
+  { id: "kg", name: "Кыргызстан", flag: getAssetPath("/images/flag_kg.png") },
+  { id: "by", name: "Беларусь", flag: getAssetPath("/images/flag_by.png") },
+  { id: "cn", name: "Китай", flag: getAssetPath("/images/flag_cn.png") },
 ];
 
 /**
@@ -149,7 +150,7 @@ export const RegistrationWizard: React.FC = () => {
         <div className="flex items-center justify-between pb-1">
           <Link href="/" className="relative w-[94px] h-[36px] block">
             <Image
-              src="/images/logo.png"
+              src={getAssetPath("/images/logo.png")}
               alt="MiraMoney"
               fill
               priority

@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import { getAssetPath } from "@/lib/utils";
 
 interface HeroSectionProps {
   onStartTransfer?: () => void;
@@ -23,7 +24,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onStartTransfer }) => 
         <div className="lg:hidden w-full flex justify-center">
           <div className="relative w-full max-w-[335px] h-[220px] rounded-[16px] overflow-hidden">
             <Image
-              src="/images/hero.png"
+              src={getAssetPath("/images/hero.png")}
               alt="Денежные переводы"
               fill
               priority
@@ -68,7 +69,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onStartTransfer }) => 
         <div className="hidden lg:flex justify-end flex-shrink-0">
           <div className="relative w-[520px] h-[380px] rounded-[20px] overflow-hidden shadow-lg">
             <Image
-              src="/images/hero.png"
+              src={getAssetPath("/images/hero.png")}
               alt="Денежные переводы за рубеж"
               fill
               priority

@@ -1,5 +1,6 @@
 import React from "react";
 import Image from "next/image";
+import { getAssetPath } from "@/lib/utils";
 
 /**
  * Секция "Как отправить перевод?" — 100% точное соответствие Figma 11:596 (Desktop) и 20:1254 (Mobile)
@@ -63,7 +64,7 @@ export const HowToSection: React.FC = () => {
           {/* Правая колонка: HowToGraphic (#11:600: 580x280px) */}
           <div className="relative w-[580px] h-[280px] rounded-[24px] overflow-hidden shadow-sm bg-[#F2F5F7] flex-shrink-0">
             <Image
-              src="/images/how_to_graphic.png"
+              src={getAssetPath("/images/how_to_graphic.png")}
               alt="Как отправить перевод"
               fill
               className="object-cover"
@@ -76,7 +77,7 @@ export const HowToSection: React.FC = () => {
           {/* Графика (#20:1256: 335x180px, borderRadius 18px) */}
           <div className="relative w-full h-[180px] rounded-[18px] overflow-hidden bg-[#F2F5F7]">
             <Image
-              src="/images/how_to_graphic.png"
+              src={getAssetPath("/images/how_to_graphic.png")}
               alt="Как отправить перевод"
               fill
               className="object-cover"

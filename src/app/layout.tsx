@@ -1,10 +1,17 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? (process.env.NODE_ENV === "production" ? "/mirasite" : "");
+
 export const metadata: Metadata = {
   title: "MiraMoney — Быстрые и надёжные денежные переводы за рубеж",
   description: "Отправляйте денежные переводы за рубеж (Узбекистан, Китай, Беларусь, Таджикистан, Кыргызстан) по номеру телефона или карты с выгодным курсом и комиссией 0 ₽.",
   keywords: "денежные переводы, переводы в узбекистан, переводы в китай, переводы онлайн, miramoney, трансгран",
+  icons: {
+    icon: `${basePath}/images/logo.png`,
+    shortcut: `${basePath}/images/logo.png`,
+    apple: `${basePath}/images/logo.png`,
+  },
   openGraph: {
     title: "MiraMoney — Международные денежные переводы",
     description: "Быстрые и надёжные переводы за рубеж с выгодным курсом и без скрытых комиссий.",

@@ -5,6 +5,7 @@ import { NAV_LINKS } from "@/data/mockData";
 import { X, ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { getAssetPath } from "@/lib/utils";
 
 interface MobileNavDrawerProps {
   isOpen: boolean;
@@ -46,7 +47,7 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
           <div className="flex items-center justify-between pb-4 border-b border-[#EDF0F2]">
             <div className="relative w-[94px] h-[36px]">
               <Image
-                src="/images/logo.png"
+                src={getAssetPath("/images/logo.png")}
                 alt="MiraMoney"
                 fill
                 className="object-contain"

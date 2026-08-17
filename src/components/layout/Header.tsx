@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { MobileNavDrawer } from "./MobileNavDrawer";
+import { getAssetPath } from "@/lib/utils";
 
 interface HeaderProps {
   onStartTransfer?: () => void;
@@ -23,7 +24,7 @@ export const Header: React.FC<HeaderProps> = ({ onStartTransfer }) => {
           <div className="flex items-center gap-12">
             <Link href="/" className="relative w-[94px] h-[36px] flex-shrink-0 flex items-center">
               <Image
-                src="/images/logo.png"
+                src={getAssetPath("/images/logo.png")}
                 alt="MiraMoney"
                 fill
                 priority

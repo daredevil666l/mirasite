@@ -1,5 +1,6 @@
 import React from "react";
 import Image from "next/image";
+import { getAssetPath } from "@/lib/utils";
 
 /**
  * Секция "Разные способы переводов" — 100% точное соответствие Figma 11:570 (Desktop) и 13:1230 (Mobile)
@@ -29,7 +30,7 @@ export const WaysSection: React.FC = () => {
         {/* WaysIcon (#11:574: только на Desktop, на mobile в Figma иконки нет) */}
         <div className="hidden lg:block relative w-[120px] h-[120px] rounded-[16px] overflow-hidden flex-shrink-0">
           <Image
-            src="/images/ways_icon.png"
+            src={getAssetPath("/images/ways_icon.png")}
             alt="Способы переводов"
             fill
             className="object-contain"

@@ -34,3 +34,17 @@ export function parseMoney(value: string): number {
   const num = parseFloat(clean);
   return isNaN(num) ? 0 : num;
 }
+
+/**
+ * Получение корректного пути к статическому ассету с учетом basePath (для GitHub Pages)
+ */
+export function getAssetPath(path: string): string {
+  if (!path) return "";
+  if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("data:")) {
+    return path;
+  }
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? (process.env.NODE_ENV === "production" ? "/mirasite" : "");
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+  return `${basePath}${cleanPath}`;
+}
+

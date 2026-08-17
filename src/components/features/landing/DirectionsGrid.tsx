@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import { getAssetPath } from "@/lib/utils";
 
 interface DirectionsGridProps {
   onSelectCountry?: (countryName: string) => void;
@@ -13,22 +14,22 @@ interface DirectionsGridProps {
 export const DirectionsGrid: React.FC<DirectionsGridProps> = ({ onSelectCountry }) => {
   // Порядок для десктопа (#11:577)
   const desktopDirections = [
-    { id: "uz", name: "Узбекистан", flag: "/images/flag_uz.png" },
-    { id: "cn", name: "Китай", flag: "/images/flag_cn.png" },
-    { id: "by", name: "Беларусь", flag: "/images/flag_by.png" },
-    { id: "ru", name: "Россия", flag: "/images/flag_ru.png" },
-    { id: "kg", name: "Кыргызстан", flag: "/images/flag_kg.png" },
-    { id: "tj", name: "Таджикистан", flag: "/images/flag_tj.png" },
+    { id: "uz", name: "Узбекистан", flag: getAssetPath("/images/flag_uz.png") },
+    { id: "cn", name: "Китай", flag: getAssetPath("/images/flag_cn.png") },
+    { id: "by", name: "Беларусь", flag: getAssetPath("/images/flag_by.png") },
+    { id: "ru", name: "Россия", flag: getAssetPath("/images/flag_ru.png") },
+    { id: "kg", name: "Кыргызстан", flag: getAssetPath("/images/flag_kg.png") },
+    { id: "tj", name: "Таджикистан", flag: getAssetPath("/images/flag_tj.png") },
   ];
 
   // Точный порядок для мобильного (#13:1235: C2 Китай, C1 Узбекистан, C3 Россия, C4 Беларусь, C5 Кыргызстан, C6 Таджикистан)
   const mobileDirections = [
-    { id: "cn", name: "Китай", flag: "/images/flag_cn.png" },
-    { id: "uz", name: "Узбекистан", flag: "/images/flag_uz.png" },
-    { id: "ru", name: "Россия", flag: "/images/flag_ru.png" },
-    { id: "by", name: "Беларусь", flag: "/images/flag_by.png" },
-    { id: "kg", name: "Кыргызстан", flag: "/images/flag_kg.png" },
-    { id: "tj", name: "Таджикистан", flag: "/images/flag_tj.png" },
+    { id: "cn", name: "Китай", flag: getAssetPath("/images/flag_cn.png") },
+    { id: "uz", name: "Узбекистан", flag: getAssetPath("/images/flag_uz.png") },
+    { id: "ru", name: "Россия", flag: getAssetPath("/images/flag_ru.png") },
+    { id: "by", name: "Беларусь", flag: getAssetPath("/images/flag_by.png") },
+    { id: "kg", name: "Кыргызстан", flag: getAssetPath("/images/flag_kg.png") },
+    { id: "tj", name: "Таджикистан", flag: getAssetPath("/images/flag_tj.png") },
   ];
 
   return (

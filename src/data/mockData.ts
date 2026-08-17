@@ -1,4 +1,5 @@
 import { CountryDirection, Currency, FAQItem, NavLink, Review } from "@/types";
+import { getAssetPath } from "@/lib/utils";
 
 /**
  * Навигационные ссылки хедера
@@ -14,14 +15,14 @@ export const NAV_LINKS: NavLink[] = [
  * Список поддерживаемых валют (из макета поп-апа выбора валюты)
  */
 export const SUPPORTED_CURRENCIES: Currency[] = [
-  { code: "UZS", name: "Узбекский сум", symbol: "UZS", flag: "/images/flag_uz.png" },
-  { code: "CNY", name: "Китайский юань", symbol: "¥", flag: "/images/flag_cn.png" },
-  { code: "BYN", name: "Белорусский рубль", symbol: "Br", flag: "/images/flag_by.png" },
-  { code: "RUB", name: "Российский рубль", symbol: "₽", flag: "/images/flag_ru.png" },
-  { code: "KGS", name: "Кыргызский сом", symbol: "KGS", flag: "/images/flag_kg.png" },
-  { code: "TJS", name: "Таджикский сомони", symbol: "TJS", flag: "/images/flag_tj.png" },
-  { code: "USD", name: "Доллар США", symbol: "$", flag: "/images/flag_ru.png" },
-  { code: "EUR", name: "Евро", symbol: "€", flag: "/images/flag_by.png" },
+  { code: "UZS", name: "Узбекский сум", symbol: "UZS", flag: getAssetPath("/images/flag_uz.png") },
+  { code: "CNY", name: "Китайский юань", symbol: "¥", flag: getAssetPath("/images/flag_cn.png") },
+  { code: "BYN", name: "Белорусский рубль", symbol: "Br", flag: getAssetPath("/images/flag_by.png") },
+  { code: "RUB", name: "Российский рубль", symbol: "₽", flag: getAssetPath("/images/flag_ru.png") },
+  { code: "KGS", name: "Кыргызский сом", symbol: "KGS", flag: getAssetPath("/images/flag_kg.png") },
+  { code: "TJS", name: "Таджикский сомони", symbol: "TJS", flag: getAssetPath("/images/flag_tj.png") },
+  { code: "USD", name: "Доллар США", symbol: "$", flag: getAssetPath("/images/flag_ru.png") },
+  { code: "EUR", name: "Евро", symbol: "€", flag: getAssetPath("/images/flag_by.png") },
 ];
 
 /**
@@ -34,7 +35,7 @@ export const COUNTRY_DIRECTIONS: CountryDirection[] = [
     currencyCode: "UZS",
     currencyName: "Узбекский сум",
     rate: 153.66, // 1 RUB = 153.66 UZS из макета
-    flagUrl: "/images/flag_uz.png",
+    flagUrl: getAssetPath("/images/flag_uz.png"),
     minAmountRUB: 100,
     maxAmountRUB: 600000,
     methods: ["По номеру телефона", "На карту Uzcard/Humo", "По банковским реквизитам"],
@@ -46,7 +47,7 @@ export const COUNTRY_DIRECTIONS: CountryDirection[] = [
     currencyCode: "CNY",
     currencyName: "Китайский юань",
     rate: 0.082, // 1 RUB = 0.082 CNY
-    flagUrl: "/images/flag_cn.png",
+    flagUrl: getAssetPath("/images/flag_cn.png"),
     minAmountRUB: 1000,
     maxAmountRUB: 600000,
     methods: ["Alipay", "WeChat Pay", "UnionPay"],
@@ -58,7 +59,7 @@ export const COUNTRY_DIRECTIONS: CountryDirection[] = [
     currencyCode: "BYN",
     currencyName: "Белорусский рубль",
     rate: 0.038, // 1 RUB = 0.038 BYN
-    flagUrl: "/images/flag_by.png",
+    flagUrl: getAssetPath("/images/flag_by.png"),
     minAmountRUB: 100,
     maxAmountRUB: 600000,
     methods: ["На карту БЕЛКАРТ/МИР", "По номеру телефона", "На банковский счет"],
@@ -70,7 +71,7 @@ export const COUNTRY_DIRECTIONS: CountryDirection[] = [
     currencyCode: "RUB",
     currencyName: "Российский рубль",
     rate: 1.0,
-    flagUrl: "/images/flag_ru.png",
+    flagUrl: getAssetPath("/images/flag_ru.png"),
     minAmountRUB: 100,
     maxAmountRUB: 600000,
     methods: ["СБП", "На карту МИР/любого банка", "По реквизитам счета"],
@@ -82,7 +83,7 @@ export const COUNTRY_DIRECTIONS: CountryDirection[] = [
     currencyCode: "KGS",
     currencyName: "Кыргызский сом",
     rate: 0.98, // 1 RUB = 0.98 KGS
-    flagUrl: "/images/flag_kg.png",
+    flagUrl: getAssetPath("/images/flag_kg.png"),
     minAmountRUB: 100,
     maxAmountRUB: 600000,
     methods: ["Элкарт", "По номеру телефона", "МБанк", "О!Деньги"],
@@ -94,7 +95,7 @@ export const COUNTRY_DIRECTIONS: CountryDirection[] = [
     currencyCode: "TJS",
     currencyName: "Таджикский сомони",
     rate: 0.12, // 1 RUB = 0.12 TJS
-    flagUrl: "/images/flag_tj.png",
+    flagUrl: getAssetPath("/images/flag_tj.png"),
     minAmountRUB: 100,
     maxAmountRUB: 600000,
     methods: ["Корти Милли", "По номеру телефона", "Душанбе Сити", "Алиф"],

@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { getAssetPath } from "@/lib/utils";
 
 export type DashboardTab =
   | "profile"
@@ -46,7 +47,7 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
       {/* Логотип MiraMoney (#41:3806 / #59:2: 94x36px) */}
       <Link href="/" className="relative w-[94px] h-[36px] flex items-center">
         <Image
-          src="/images/logo.png"
+          src={getAssetPath("/images/logo.png")}
           alt="MiraMoney"
           fill
           priority
