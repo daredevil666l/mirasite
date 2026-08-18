@@ -165,16 +165,8 @@ export const RegistrationWizard: React.FC = () => {
         alert("Пожалуйста, укажите корректные серию и номер документа");
         return;
       }
-      if (docExpiry) {
-        const expDate = new Date(docExpiry);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        if (expDate < today) {
-          alert("Срок действия документа не может быть в прошлом");
-          return;
-        }
-      }
       setStep(5);
+
     } else if (step === 5) {
       if (!addressCountry || !addressCity) {
         alert("Пожалуйста, укажите страну и город проживания");
@@ -449,7 +441,6 @@ export const RegistrationWizard: React.FC = () => {
                   <input
                     ref={dateInputRef}
                     type="date"
-                    min={new Date().toISOString().split("T")[0]}
                     value={docExpiry}
                     onChange={(e) => setDocExpiry(e.target.value)}
                     placeholder="Срок действия"
@@ -457,6 +448,7 @@ export const RegistrationWizard: React.FC = () => {
                   />
                   <Calendar className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8C9199] pointer-events-none" />
                 </div>
+
               </div>
             </div>
 
