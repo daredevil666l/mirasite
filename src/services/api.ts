@@ -7,6 +7,12 @@ import {
   LegalDocument,
   FAQItem,
   Review,
+  DocumentFormatConfig,
+  SystemMessageConfig,
+  AuthSendCodeResponse,
+  AuthVerifyCodeResponse,
+  RegisterPayload,
+  UpdateContactResponse,
 } from "@/types";
 import {
   SUPPORTED_CURRENCIES,
@@ -16,7 +22,10 @@ import {
   LEGAL_DOCUMENTS,
   FAQ_ITEMS,
   REVIEWS,
+  DOCUMENT_FORMATS,
+  SYSTEM_MESSAGES,
 } from "@/data/mockData";
+
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
@@ -180,3 +189,181 @@ export async function getReviewsList(): Promise<Review[]> {
     return REVIEWS;
   }
 }
+
+/**
+ * 9. Отправка SMS-кода для авторизации или регистрации
+ */
+export async function sendAuthCode(phone: string): Promise<AuthSendCodeResponse> {
+  try {
+    return await fetchClient<AuthSendCodeResponse>("/auth/send-code", {
+      method: "POST",
+      body: JSON.stringify({ phone }),
+    });
+  } catch {
+    return {
+      success: true,
+      message: "Код подтверждения успешно отправлен в SMS",
+      retryAfterSeconds: 59,
+    };
+  }
+}
+
+/**
+ * 10. Проверка SMS-кода и авторизация
+ */
+export async function verifyAuthCode(
+  phone: string,
+  code: string
+): Promise<AuthVerifyCodeResponse> {
+  try {
+    return await fetchClient<AuthVerifyCodeResponse>("/auth/verify-code", {
+      method: "POST",
+      body: JSON.stringify({ phone, code }),
+    });
+  } catch {
+    return {
+      token: "mock-jwt-token-xyz123",
+      user: CURRENT_USER,
+      isNewUser: false,
+    };
+  }
+}
+
+/**
+ * 11. Создание профиля нового пользователя (Регистрация)
+ */
+export async function registerUser(
+  payload: RegisterPayload
+): Promise<{ success: boolean; user: UserAccount }> {
+  try {
+    return await fetchClient<{ success: boolean; user: UserAccount }>("/auth/register", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  } catch {
+    return {
+      success: true,
+      user: {
+        ...CURRENT_USER,
+        fullName: `${payload.surname} ${payload.name}`,
+        phone: payload.phone,
+      },
+    };
+  }
+}
+
+/**
+ * 12. Обновление профиля пользователя
+ */
+export async function updateUserProfile(
+  payload: Partial<UserAccount>
+): Promise<UserAccount> {
+  try {
+    return await fetchClient<UserAccount>("/user/profile", {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+  } catch {
+    return {
+      ...CURRENT_USER,
+      ...payload,
+    };
+  }
+}
+
+/**
+ * 13. Отправка и подтверждение смены номера телефона
+ */
+export async function sendPhoneVerificationCode(
+  newPhone: string
+): Promise<AuthSendCodeResponse> {
+  try {
+    return await fetchClient<AuthSendCodeResponse>("/user/phone/send-code", {
+      method: "POST",
+      body: JSON.stringify({ phone: newPhone }),
+    });
+  } catch {
+    return {
+      success: true,
+      message: "Код подтверждения отправлен на новый номер",
+      retryAfterSeconds: 59,
+    };
+  }
+}
+
+export async function verifyPhoneChange(
+  newPhone: string,
+  code: string
+): Promise<UpdateContactResponse> {
+  try {
+    return await fetchClient<UpdateContactResponse>("/user/phone/verify", {
+      method: "POST",
+      body: JSON.stringify({ phone: newPhone, code }),
+    });
+  } catch {
+    return {
+      success: true,
+      message: "Номер телефона успешно изменён и подтверждён",
+    };
+  }
+}
+
+/**
+ * 14. Отправка и подтверждение смены E-mail
+ */
+export async function sendEmailVerificationCode(
+  newEmail: string
+): Promise<AuthSendCodeResponse> {
+  try {
+    return await fetchClient<AuthSendCodeResponse>("/user/email/send-code", {
+      method: "POST",
+      body: JSON.stringify({ email: newEmail }),
+    });
+  } catch {
+    return {
+      success: true,
+      message: "Код подтверждения отправлен на новый e-mail",
+      retryAfterSeconds: 59,
+    };
+  }
+}
+
+export async function verifyEmailChange(
+  newEmail: string,
+  code: string
+): Promise<UpdateContactResponse> {
+  try {
+    return await fetchClient<UpdateContactResponse>("/user/email/verify", {
+      method: "POST",
+      body: JSON.stringify({ email: newEmail, code }),
+    });
+  } catch {
+    return {
+      success: true,
+      message: "Адрес электронной почты успешно обновлён",
+    };
+  }
+}
+
+/**
+ * 15. Получение форматов и масок национальных документов
+ */
+export async function getDocumentFormats(): Promise<DocumentFormatConfig[]> {
+  try {
+    return await fetchClient<DocumentFormatConfig[]>("/documents/formats");
+  } catch {
+    return DOCUMENT_FORMATS;
+  }
+}
+
+/**
+ * 16. Получение текстов сообщений, ошибок и отказов
+ */
+export async function getSystemMessages(): Promise<SystemMessageConfig[]> {
+  try {
+    return await fetchClient<SystemMessageConfig[]>("/system/messages");
+  } catch {
+    return SYSTEM_MESSAGES;
+  }
+}
+

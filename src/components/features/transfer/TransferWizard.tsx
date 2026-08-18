@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { formatMoney, parseMoney } from "@/lib/utils";
+
 import { CurrencySelectorModal } from "../calculator/CurrencySelectorModal";
 import { Currency } from "@/types";
 import { Check, X, ArrowLeft } from "lucide-react";
@@ -77,16 +79,10 @@ export const TransferWizard: React.FC<TransferWizardProps> = ({
   isModal = false,
   onClose,
 }) => {
+  const searchParams = useSearchParams();
   const [step, setStep] = useState<number>(1);
   const [country, setCountry] = useState<string>(initialCountryName);
   const [isCurrencyModalOpen, setIsCurrencyModalOpen] = useState<boolean>(false);
-
-  // Синхронизация переданной страны
-  useEffect(() => {
-    if (initialCountryName) {
-      setCountry(initialCountryName);
-    }
-  }, [initialCountryName]);
 
   // Шаг 1: Суммы
   const currentRate = CURRENCY_RATES[country]?.rate || 153.66;
@@ -102,13 +98,6 @@ export const TransferWizard: React.FC<TransferWizardProps> = ({
   const availableBanks = BANKS_BY_COUNTRY[country] || BANKS_BY_COUNTRY["Узбекистан"] || [];
   const [selectedBank, setSelectedBank] = useState<string>(availableBanks[0]?.name || "Hamkorbank");
 
-  useEffect(() => {
-    const banks = BANKS_BY_COUNTRY[country] || BANKS_BY_COUNTRY["Узбекистан"];
-    if (banks && banks.length > 0) {
-      setSelectedBank(banks[0].name);
-    }
-  }, [country]);
-
   // Шаг 3: Данные получателя (пустые по умолчанию)
   const [recipientPhone, setRecipientPhone] = useState<string>("");
   const [recipientFirstName, setRecipientFirstName] = useState<string>("");
@@ -119,6 +108,54 @@ export const TransferWizard: React.FC<TransferWizardProps> = ({
 
   // Шаг 5: Таймер курса
   const [rateTimer, setRateTimer] = useState<number>(163); // 02:43
+
+  // Синхронизация переданной страны и query params
+  useEffect(() => {
+    if (searchParams) {
+      const qCountry = searchParams.get("country");
+      const qRecipient = searchParams.get("recipient");
+      const qAmount = searchParams.get("amount");
+
+      if (qCountry && CURRENCY_RATES[qCountry]) {
+        setCountry(qCountry);
+      } else if (initialCountryName) {
+        setCountry(initialCountryName);
+      }
+
+      if (qRecipient) {
+        const parts = qRecipient.trim().split(/\s+/);
+        if (parts.length >= 2) {
+          setRecipientLastName(parts[0]);
+          setRecipientFirstName(parts.slice(1).join(" "));
+        } else {
+          setRecipientFirstName(qRecipient);
+        }
+      }
+
+      if (qAmount) {
+        const parsed = parseInt(qAmount.replace(/\D/g, ""), 10);
+        if (!isNaN(parsed) && parsed > 0) {
+          setSendAmount(parsed);
+          setSendInput(formatMoney(parsed));
+          const rate = (qCountry && CURRENCY_RATES[qCountry]?.rate) || currentRate;
+          const rec = Math.round(parsed * rate);
+          setReceiveAmount(rec);
+          setReceiveInput(formatMoney(rec));
+        }
+      }
+    } else if (initialCountryName) {
+      setCountry(initialCountryName);
+    }
+  }, [initialCountryName, searchParams]);
+
+  useEffect(() => {
+    const banks = BANKS_BY_COUNTRY[country] || BANKS_BY_COUNTRY["Узбекистан"];
+    if (banks && banks.length > 0) {
+      setSelectedBank(banks[0].name);
+    }
+  }, [country]);
+
+
 
   useEffect(() => {
     const calculated = Math.round(sendAmount * currentRate);

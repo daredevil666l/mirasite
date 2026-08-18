@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { MOCK_TRANSACTIONS } from "@/data/mockData";
 import { TransactionRecord } from "@/types";
@@ -15,6 +16,7 @@ interface HistoryTabProps {
  * - Mobile (#22:1344 / #22:1603)
  */
 export const HistoryTab: React.FC<HistoryTabProps> = ({ onStartNewTransfer }) => {
+  const router = useRouter();
   const [selectedTx, setSelectedTx] = useState<TransactionRecord | null>(null);
 
   const [currency, setCurrency] = useState("");
@@ -22,13 +24,21 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ onStartNewTransfer }) =>
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
+  const handleRepeatTransfer = (tx: TransactionRecord) => {
+    if (onStartNewTransfer) {
+      onStartNewTransfer(tx.country);
+    } else {
+      router.push(`/transfer?country=${encodeURIComponent(tx.country)}&recipient=${encodeURIComponent(tx.recipient)}`);
+    }
+  };
+
   // Если выбран перевод -> Экран "Детали перевода" (#22:1603)
   if (selectedTx) {
     return (
       <div className="flex flex-col gap-5 lg:gap-6 w-full max-w-[1064px]">
         <button
           onClick={() => setSelectedTx(null)}
-          className="flex items-center gap-1.5 text-[14px] font-semibold text-[#0D8C47] hover:underline self-start"
+          className="flex items-center gap-1.5 text-[14px] font-semibold text-[#0D8C47] hover:underline self-start cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Назад к истории</span>
@@ -38,7 +48,7 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ onStartNewTransfer }) =>
           Детали перевода
         </h1>
 
-        <div className="w-full max-w-[560px] bg-white rounded-[14px] p-6 lg:p-7 flex flex-col gap-4">
+        <div className="w-full max-w-[560px] bg-white rounded-[14px] p-6 lg:p-7 flex flex-col gap-4 border border-[#E5E8ED] shadow-xs">
           <div
             className={`w-fit px-3 py-1 rounded-[6px] text-[13px] font-semibold ${
               selectedTx.status === "success"
@@ -63,14 +73,12 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ onStartNewTransfer }) =>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 lg:gap-3 pt-3">
             <button
               type="button"
-              onClick={() => {
-                if (onStartNewTransfer) onStartNewTransfer(selectedTx.country);
-                else alert(`Повтор перевода для ${selectedTx.recipient}`);
-              }}
-              className="h-[44px] px-6 bg-[#0D8C47] hover:bg-[#0D6638] text-white text-[14px] font-semibold rounded-[10px] flex items-center justify-center transition-colors shadow-xs active:scale-[0.98]"
+              onClick={() => handleRepeatTransfer(selectedTx)}
+              className="h-[44px] px-6 bg-[#0D8C47] hover:bg-[#0D6638] text-white text-[14px] font-semibold rounded-[10px] flex items-center justify-center transition-colors shadow-xs active:scale-[0.98] cursor-pointer"
             >
               Повторить
             </button>
+
 
             <button
               type="button"

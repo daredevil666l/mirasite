@@ -27,15 +27,29 @@
 
 | Метод клиента в `src/services/api.ts` | HTTP Endpoint | Описание |
 |---|---|---|
+| **Авторизация и регистрация** | | |
+| `sendAuthCode(phone)` | `POST /auth/send-code` | Отправка проверочного SMS-кода для входа/регистрации |
+| `verifyAuthCode(phone, code)` | `POST /auth/verify-code` | Проверка SMS-кода и получение сессии/JWT токена |
+| `registerUser(payload)` | `POST /auth/register` | Создание профиля нового пользователя (паспорт, адрес, согласия) |
+| **Профиль и контакты** | | |
+| `getUserProfile()` | `GET /user/profile` | Получение профиля текущего авторизованного пользователя |
+| `updateUserProfile(payload)` | `PUT /user/profile` | Обновление данных профиля (ФИО, предпочтения) |
+| `sendPhoneVerificationCode(newPhone)` | `POST /user/phone/send-code` | Отправка SMS-кода на новый номер телефона |
+| `verifyPhoneChange(newPhone, code)` | `POST /user/phone/verify` | Подтверждение смены номера телефона проверочным кодом |
+| `sendEmailVerificationCode(newEmail)` | `POST /user/email/send-code` | Отправка проверочного кода на новый E-mail |
+| `verifyEmailChange(newEmail, code)` | `POST /user/email/verify` | Подтверждение смены E-mail проверочным кодом |
+| **Переводы и валюты** | | |
 | `getSupportedCurrencies()` | `GET /currencies` | Список поддерживаемых валют и флагов |
 | `getCountryDirections()` | `GET /directions` | Список стран с актуальными курсами и лимитами |
 | `calculateTransfer(countryId, amount)` | `POST /transfers/calculate` | Расчет суммы получения, комиссии и фиксация курса |
 | `createTransfer(payload)` | `POST /transfers` | Создание и отправка заявки на перевод |
-| `getUserProfile()` | `GET /user/profile` | Получение профиля авторизованного пользователя |
-| `getTransactionsHistory(filters)` | `GET /transfers/history` | История переводов с поддержкой фильтров |
+| `getTransactionsHistory(filters)` | `GET /transfers/history` | История переводов с поддержкой фильтрации |
+| **Справочники и документы** | | |
+| `getDocumentFormats()` | `GET /documents/formats` | Список форматов, масок и правил валидации национальных документов |
+| `getSystemMessages()` | `GET /system/messages` | Справочник текстов системных ошибок, отказов и уведомлений |
 | `getLegalDocuments()` | `GET /documents` | Тексты правовых документов для раздела «Документы» |
 | `getFAQList()` | `GET /faq` | Справочные вопросы и ответы (FAQ) |
-| `getReviewsList()` | `GET /reviews` | Отзывы клиентов |
+| `getReviewsList()` | `GET /reviews` | Отзывы клиентов сервиса |
 
 ### 3. Подключение бэкенда через `.env.local`
 Для подключения готового бэкенда достаточно создать файл `.env.local` на основе [`.env.example`](./.env.example):
@@ -51,6 +65,8 @@ NEXT_PUBLIC_API_BASE_URL=https://api.miramoney.ru/v1
 - `TransferCalculation` — сумма отправления, валюта, курс, комиссия, сумма к зачислению.
 - `UserAccount` — профиль, статус KYC-верификации, подтвержденные контакты.
 - `TransactionRecord` — запись об операции (дата, суммы, статус, реквизиты).
+- `DocumentFormatConfig` — форматы национальных документов (РФ, Узбекистан, Таджикистан, Кыргызстан, Беларусь, Китай) с масками и правилами срока действия.
+- `SystemMessageConfig` — типовые коды отказов, ошибок (`KYC_DOC_EXPIRED`, `TRANSFER_LIMIT_EXCEEDED` и др.).
 - `LegalDocument` — статьи правовых соглашений.
 
 ---
@@ -82,51 +98,54 @@ npm run start
 src/
 ├── app/
 │   ├── layout.tsx              # Корневой layout приложения (шрифты Inter, метатеги)
-│   ├── page.tsx                # Главная страница (Landing page)
-│   ├── transfer/page.tsx       # Пошаговый сценарий перевода (Transfer Wizard)
+│   ├── page.tsx                # Главная страница (Landing page с модальным калькулятором)
+│   ├── transfer/page.tsx       # Пошаговый сценарий перевода (Transfer Wizard с поддержкой query-параметров)
 │   ├── dashboard/page.tsx      # Личный кабинет пользователя (Dashboard)
 │   ├── profile/page.tsx        # Алиас-роут для перехода в личный кабинет
-│   ├── register/page.tsx       # Экран авторизации и регистрации
+│   ├── register/page.tsx       # Экран авторизации и 6-шаговой регистрации с календарем дат
 │   └── globals.css             # Глобальные стили и анимации
 ├── components/
 │   ├── features/
 │   │   ├── calculator/
-│   │   │   ├── CurrencyCalculator.tsx     # Интерактивный калькулятор в реальном времени
-│   │   │   └── CurrencySelectorModal.tsx  # Попап выбора валюты (Desktop модалка / Mobile Bottom Sheet)
+│   │   │   ├── InteractiveCalculator.tsx   # Интерактивный калькулятор в реальном времени (модалка / блок)
+│   │   │   └── CurrencySelectorModal.tsx   # Попап выбора валюты (Desktop модалка / Mobile Bottom Sheet)
 │   │   ├── transfer/
-│   │   │   └── TransferWizard.tsx         # 6 шагов оформления перевода с таймером фиксации
+│   │   │   └── TransferWizard.tsx          # 6 шагов оформления перевода с таймером фиксации и повтором
 │   │   ├── profile/
-│   │   │   ├── DashboardLayout.tsx        # Оболочка ЛК (десктоп сайдбар + мобильный таббар)
-│   │   │   ├── ProfileSidebar.tsx         # Сайдбар личного кабинета (Desktop #5:3)
-│   │   │   ├── ProfileTab.tsx             # Вкладка «Профиль» (#5:2 / #20:1300)
-│   │   │   ├── HistoryTab.tsx             # Вкладка «История переводов» + экран «Детали перевода»
-│   │   │   ├── VerificationTab.tsx        # Вкладка «Верификация» (#8:154 / #22:1397)
-│   │   │   ├── LimitsTab.tsx              # Вкладка «Лимиты» для резидентов и нерезидентов
-│   │   │   ├── SecurityTab.tsx            # Вкладка «Безопасность» (#8:389 / #22:1511)
-│   │   │   ├── SettingsTab.tsx            # Вкладка «Настройки» (#8:298 / #22:1464)
-│   │   │   └── DocumentsTab.tsx           # Вкладка «Документы» и полноэкранный режим чтения
+│   │   │   ├── DashboardLayout.tsx         # Оболочка ЛК (десктоп сайдбар + мобильный таббар)
+│   │   │   ├── ProfileSidebar.tsx          # Сайдбар личного кабинета (Desktop #5:3)
+│   │   │   ├── ProfileTab.tsx              # Вкладка «Профиль» (#5:2 / #20:1300) с управлением контактами
+│   │   │   ├── EditPhoneView.tsx           # Экранная форма смены телефона (SMS-код, таймер 59с)
+│   │   │   ├── EditEmailView.tsx           # Экранная форма смены E-mail (Email-код, таймер)
+│   │   │   ├── HistoryTab.tsx              # Вкладка «История переводов» + экран «Детали перевода» с кнопкой «Повторить»
+│   │   │   ├── TransferDetailsModal.tsx    # Модальное окно деталей перевода с кнопкой «Повторить перевод»
+│   │   │   ├── VerificationTab.tsx         # Вкладка «Верификация» (#8:154 / #22:1397)
+│   │   │   ├── LimitsTab.tsx               # Вкладка «Лимиты» для резидентов и нерезидентов
+│   │   │   ├── SecurityTab.tsx             # Вкладка «Безопасность» (#8:389 / #22:1511)
+│   │   │   ├── SettingsTab.tsx             # Вкладка «Настройки» (#8:298 / #22:1464)
+│   │   │   └── DocumentsTab.tsx            # Вкладка «Документы» и полноэкранный режим чтения
 │   │   └── landing/
-│   │       ├── HeroSection.tsx            # Главный баннер лендинга с калькулятором
-│   │       ├── DirectionsGrid.tsx         # Карточки направлений стран
-│   │       ├── HowToSection.tsx           # Пошаговая инструкция «Как это работает»
-│   │       ├── AdvantagesSection.tsx      # Преимущества сервиса
-│   │       ├── FAQSection.tsx             # Интерактивный аккордеон вопросов и ответов
-│   │       ├── ReviewsSection.tsx         # Отзывы клиентов
-│   │       └── WaysSection.tsx            # Способы переводов и банки
+│   │       ├── HeroSection.tsx             # Главный баннер лендинга с CTA «Отправить перевод» → калькулятор
+│   │       ├── DirectionsGrid.tsx          # Карточки направлений стран с быстрым переходом в калькулятор
+│   │       ├── HowToSection.tsx            # Пошаговая инструкция «Как это работает»
+│   │       ├── AdvantagesSection.tsx       # Преимущества сервиса
+│   │       ├── FAQSection.tsx              # Интерактивный аккордеон вопросов и ответов
+│   │       ├── ReviewsSection.tsx          # Отзывы клиентов
+│   │       └── WaysSection.tsx             # Способы переводов и банки
 │   ├── layout/
-│   │   ├── Header.tsx                     # Шапка сайта с навигацией и кнопками действий
-│   │   ├── Footer.tsx                     # Подвал сайта с правовой информацией
-│   │   └── MobileNavDrawer.tsx            # Адаптивное меню для мобильных устройств
+│   │   ├── Header.tsx                      # Шапка сайта с навигацией и кнопками действий
+│   │   ├── Footer.tsx                      # Подвал сайта с правовой информацией
+│   │   └── MobileNavDrawer.tsx             # Адаптивное меню для мобильных устройств
 │   └── ui/
-│       ├── Accordion.tsx                  # Переиспользуемый аккордеон
-│       ├── Button.tsx                     # Базовые UI-кнопки
-│       └── Modal.tsx                      # Универсальный модальный контейнер
+│       ├── Accordion.tsx                   # Переиспользуемый аккордеон
+│       ├── Button.tsx                      # Базовые UI-кнопки
+│       └── Modal.tsx                       # Универсальный модальный контейнер
 ├── data/
-│   └── mockData.ts                        # Централизованные фикстуры и справочники
+│   └── mockData.ts                         # Централизованные фикстуры, справочники документов и сообщений
 ├── services/
-│   └── api.ts                             # Типизированный API-клиент для бэкенда
+│   └── api.ts                              # Полный типизированный API-клиент для бэкенда
 └── types/
-    └── index.ts                           # Все TypeScript типы и интерфейсы
+    └── index.ts                            # Все TypeScript типы, интерфейсы и DTO
 ```
 
 ---
@@ -134,10 +153,12 @@ src/
 ## 🎨 Реализованные сценарии и экраны
 
 1. **Главная страница (Landing Page)**:
+   - Блок `HeroSection` содержит главную кнопку CTA *«Отправить перевод»*, открывающую интерактивный калькулятор `InteractiveCalculator` (также доступный по роуту `/transfer`).
    - Интерактивный двунаправленный калькулятор перевода с мгновенным пересчетом.
    - Фирменный попап выбора валюты (модалка Desktop `#107:208` / Bottom Sheet Mobile `#107:812`).
    - Направления перевода с актуальными курсами валют.
    - Интерактивный FAQ-аккордеон и отзывы.
+
 
 2. **Пошаговый сценарий перевода денег (`/transfer`)**:
    - **Шаг 1**: Выбор направления, суммы и валюты.

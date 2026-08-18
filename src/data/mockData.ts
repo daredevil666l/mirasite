@@ -1,4 +1,12 @@
-import { CountryDirection, Currency, FAQItem, NavLink, Review } from "@/types";
+import {
+  CountryDirection,
+  Currency,
+  FAQItem,
+  NavLink,
+  Review,
+  DocumentFormatConfig,
+  SystemMessageConfig,
+} from "@/types";
 import { getAssetPath } from "@/lib/utils";
 
 /**
@@ -370,4 +378,136 @@ export const LEGAL_DOCUMENTS: import("@/types").LegalDocument[] = [
     ],
   },
 ];
+
+/**
+ * Справочник форматов и масок национальных документов по странам
+ */
+export const DOCUMENT_FORMATS: DocumentFormatConfig[] = [
+  {
+    countryCode: "ru",
+    countryName: "Россия",
+    docTypeName: "Паспорт гражданина РФ",
+    seriesNumberPlaceholder: "0000 000000",
+    seriesNumberMask: "9999 999999",
+    seriesNumberRegex: "^\\d{4}\\s?\\d{6}$",
+    hasExpiryDate: false,
+    expiryValidationRule: "any",
+    examples: ["4510 123456", "4608 987654"],
+  },
+  {
+    countryCode: "uz",
+    countryName: "Узбекистан",
+    docTypeName: "ID-карта / Биометрический паспорт",
+    seriesNumberPlaceholder: "AA 1234567",
+    seriesNumberMask: "AA 9999999",
+    seriesNumberRegex: "^[A-Za-z]{2}\\s?\\d{7}$",
+    hasExpiryDate: true,
+    expiryValidationRule: "future_date",
+    examples: ["FA 1234567", "AB 7654321"],
+  },
+  {
+    countryCode: "tj",
+    countryName: "Таджикистан",
+    docTypeName: "ID-карта / Заграничный паспорт",
+    seriesNumberPlaceholder: "A 12345678",
+    seriesNumberMask: "A 99999999",
+    seriesNumberRegex: "^[A-Za-z]{1,2}\\s?\\d{7,8}$",
+    hasExpiryDate: true,
+    expiryValidationRule: "future_date",
+    examples: ["A 12345678", "TJ 9876543"],
+  },
+  {
+    countryCode: "kg",
+    countryName: "Кыргызстан",
+    docTypeName: "ID-карта / Паспорт гражданина КР",
+    seriesNumberPlaceholder: "ID 1234567",
+    seriesNumberMask: "AA 9999999",
+    seriesNumberRegex: "^[A-Za-z]{2}\\s?\\d{7}$",
+    hasExpiryDate: true,
+    expiryValidationRule: "future_date",
+    examples: ["ID 1234567", "AN 7654321"],
+  },
+  {
+    countryCode: "by",
+    countryName: "Беларусь",
+    docTypeName: "Паспорт / ID-карта РБ",
+    seriesNumberPlaceholder: "AB 1234567",
+    seriesNumberMask: "AA 9999999",
+    seriesNumberRegex: "^[A-Za-z]{2}\\s?\\d{7}$",
+    hasExpiryDate: true,
+    expiryValidationRule: "future_date",
+    examples: ["MP 1234567", "AB 2345678"],
+  },
+  {
+    countryCode: "cn",
+    countryName: "Китай",
+    docTypeName: "ID-карта гражданина КНР / Паспорт",
+    seriesNumberPlaceholder: "18-значный ID / Паспорт",
+    seriesNumberRegex: "^[A-Za-z0-9]{8,18}$",
+    hasExpiryDate: true,
+    expiryValidationRule: "future_date",
+    examples: ["110101199003072345", "E12345678"],
+  },
+];
+
+/**
+ * Справочник системных сообщений, текстов ошибок и отказов
+ */
+export const SYSTEM_MESSAGES: SystemMessageConfig[] = [
+  {
+    code: "AUTH_SMS_CODE_SENT",
+    type: "info",
+    title: "Код отправлен",
+    message: "Код подтверждения отправлен в SMS на указанный номер телефона.",
+  },
+  {
+    code: "AUTH_INVALID_CODE",
+    type: "error",
+    title: "Неверный код",
+    message: "Введён неверный проверочный код. Проверьте SMS и повторите ввод.",
+  },
+  {
+    code: "AUTH_CODE_EXPIRED",
+    type: "error",
+    title: "Срок действия кода истёк",
+    message: "Время действия SMS-кода истекло. Запросите новый код через форму.",
+  },
+  {
+    code: "AUTH_TOO_MANY_ATTEMPTS",
+    type: "rejection",
+    title: "Слишком много попыток",
+    message: "Превышено количество попыток ввода. Повторите попытку через 15 минут.",
+  },
+  {
+    code: "KYC_DOC_EXPIRED",
+    type: "rejection",
+    title: "Истёк срок действия документа",
+    message: "Срок действия указанного документа удостоверения личности истёк. Укажите актуальный документ.",
+  },
+  {
+    code: "KYC_INVALID_DOC_FORMAT",
+    type: "error",
+    title: "Неверный формат документа",
+    message: "Серия или номер документа не соответствуют стандарту выбранного государства.",
+  },
+  {
+    code: "TRANSFER_LIMIT_EXCEEDED",
+    type: "rejection",
+    title: "Превышен лимит перевода",
+    message: "Сумма перевода превышает допустимый лимит для вашего уровня верификации. Пройдите верификацию для повышения лимитов.",
+  },
+  {
+    code: "TRANSFER_EXCHANGE_RATE_EXPIRED",
+    type: "warning",
+    title: "Курс обновился",
+    message: "Время фиксации курса истекло. Курс пересчитан по актуальному тарифу.",
+  },
+  {
+    code: "PROFILE_CONTACT_UPDATED",
+    type: "info",
+    title: "Данные обновлены",
+    message: "Контактные данные успешно обновлены и подтверждены.",
+  },
+];
+
 

@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { Suspense } from "react";
 import { TransferWizard } from "@/components/features/transfer/TransferWizard";
 
 export const metadata: Metadata = {
@@ -9,7 +10,10 @@ export const metadata: Metadata = {
 export default function TransferPage() {
   return (
     <div className="min-h-screen w-full bg-[#F7FAFC] flex items-center justify-center p-0 sm:p-6 lg:p-10 font-sans antialiased">
-      <TransferWizard isModal={false} />
+      <Suspense fallback={<div className="text-[#8C9199] text-[14px]">Загрузка формы перевода...</div>}>
+        <TransferWizard isModal={false} />
+      </Suspense>
     </div>
   );
 }
+

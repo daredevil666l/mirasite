@@ -93,3 +93,59 @@ export interface LegalDocument {
   }[];
 }
 
+export interface DocumentFormatConfig {
+  countryCode: string;
+  countryName: string;
+  docTypeName: string;
+  seriesNumberPlaceholder: string;
+  seriesNumberMask?: string;
+  seriesNumberRegex: string;
+  hasExpiryDate: boolean;
+  expiryValidationRule?: "future_date" | "any";
+  examples: string[];
+}
+
+export interface SystemMessageConfig {
+  code: string;
+  type: "error" | "rejection" | "info" | "warning";
+  title: string;
+  message: string;
+}
+
+export interface AuthSendCodePayload {
+  phone: string;
+}
+
+export interface AuthSendCodeResponse {
+  success: boolean;
+  message: string;
+  retryAfterSeconds: number;
+}
+
+export interface AuthVerifyCodeResponse {
+  token: string;
+  user: UserAccount;
+  isNewUser: boolean;
+}
+
+export interface RegisterPayload {
+  phone: string;
+  citizenship: string;
+  surname: string;
+  name: string;
+  docNumber: string;
+  docExpiryDate?: string;
+  addressCountry: string;
+  addressCity: string;
+  addressStreet?: string;
+  addressHouse?: string;
+  agreePersonalData: boolean;
+  agreeServiceRules: boolean;
+}
+
+export interface UpdateContactResponse {
+  success: boolean;
+  message: string;
+}
+
+

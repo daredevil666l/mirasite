@@ -1,7 +1,9 @@
 "use client";
 
-import React from "react";
-import { Check } from "lucide-react";
+import React, { useState } from "react";
+import { Check, ChevronRight, X } from "lucide-react";
+import { EditPhoneView } from "./EditPhoneView";
+import { EditEmailView } from "./EditEmailView";
 
 interface ProfileTabProps {
   onNavigateToTab?: (tab: string) => void;
@@ -13,6 +15,36 @@ interface ProfileTabProps {
  * - Mobile (#20:1300: 375-390px)
  */
 export const ProfileTab: React.FC<ProfileTabProps> = ({ onNavigateToTab }) => {
+  const [viewMode, setViewMode] = useState<"main" | "edit-phone" | "edit-email" | "select-edit">("main");
+  const [phone, setPhone] = useState<string>("+7 900 xxx-xx-89");
+  const [email, setEmail] = useState<string>("druxxxxx1981@gmail.com");
+
+  if (viewMode === "edit-phone") {
+    return (
+      <EditPhoneView
+        currentPhone={phone}
+        onBack={() => setViewMode("main")}
+        onSuccess={(newPhone) => {
+          setPhone(newPhone);
+          setViewMode("main");
+        }}
+      />
+    );
+  }
+
+  if (viewMode === "edit-email") {
+    return (
+      <EditEmailView
+        currentEmail={email}
+        onBack={() => setViewMode("main")}
+        onSuccess={(newEmail) => {
+          setEmail(newEmail);
+          setViewMode("main");
+        }}
+      />
+    );
+  }
+
   return (
     <div className="flex flex-col gap-5 lg:gap-8 w-full max-w-[1064px]">
       {/* Заголовок (#8:36 / #20:1302: Inter Bold 24px/28px #14171C) */}
@@ -33,7 +65,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onNavigateToTab }) => {
           </span>
           {/* #20:1307: Inter Regular 13px, #8C9199 */}
           <span className="text-[13px] font-normal text-[#8C9199]">
-            +7 900 xxx-xx-89
+            {phone}
           </span>
         </div>
       </div>
@@ -48,44 +80,63 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onNavigateToTab }) => {
 
           <div className="flex flex-col gap-3">
             {/* FieldPhone */}
-            <div className="flex flex-col gap-0.5">
-              <span className="text-[12px] font-normal text-[#8C9199]">
-                Телефон
-              </span>
-              <div className="flex items-center gap-2">
-                <span className="text-[14px] font-normal text-[#40454D]">
-                  +7 900 xxx-xx-89 · подтверждён
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[12px] font-normal text-[#8C9199]">
+                  Телефон
                 </span>
-                <div className="w-4 h-4 rounded-full bg-[#0D8C47] text-white flex items-center justify-center flex-shrink-0">
-                  <Check className="w-2.5 h-2.5 stroke-[3]" />
+                <div className="flex items-center gap-2">
+                  <span className="text-[14px] font-normal text-[#40454D]">
+                    {phone} · подтверждён
+                  </span>
+                  <div className="w-4 h-4 rounded-full bg-[#0D8C47] text-white flex items-center justify-center flex-shrink-0">
+                    <Check className="w-2.5 h-2.5 stroke-[3]" />
+                  </div>
                 </div>
               </div>
+              <button
+                type="button"
+                onClick={() => setViewMode("edit-phone")}
+                className="text-[13px] font-semibold text-[#0D8C47] hover:underline cursor-pointer"
+              >
+                Изменить
+              </button>
             </div>
 
             {/* FieldEmail */}
-            <div className="flex flex-col gap-0.5">
-              <span className="text-[12px] font-normal text-[#8C9199]">
-                E-mail
-              </span>
-              <div className="flex items-center gap-2">
-                <span className="text-[14px] font-normal text-[#40454D]">
-                  druxxxxx1981@gmail.com · подтверждён
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[12px] font-normal text-[#8C9199]">
+                  E-mail
                 </span>
-                <div className="w-4 h-4 rounded-full bg-[#0D8C47] text-white flex items-center justify-center flex-shrink-0">
-                  <Check className="w-2.5 h-2.5 stroke-[3]" />
+                <div className="flex items-center gap-2">
+                  <span className="text-[14px] font-normal text-[#40454D]">
+                    {email} · подтверждён
+                  </span>
+                  <div className="w-4 h-4 rounded-full bg-[#0D8C47] text-white flex items-center justify-center flex-shrink-0">
+                    <Check className="w-2.5 h-2.5 stroke-[3]" />
+                  </div>
                 </div>
               </div>
+              <button
+                type="button"
+                onClick={() => setViewMode("edit-email")}
+                className="text-[13px] font-semibold text-[#0D8C47] hover:underline cursor-pointer"
+              >
+                Изменить
+              </button>
             </div>
           </div>
 
           <button
             type="button"
-            onClick={() => alert("Для изменения данных обратитесь в поддержку.")}
-            className="text-[13px] font-semibold text-[#0D8C47] hover:underline text-left self-start"
+            onClick={() => setViewMode("select-edit")}
+            className="text-[13px] font-semibold text-[#0D8C47] hover:underline text-left self-start cursor-pointer"
           >
             Изменить данные
           </button>
         </div>
+
 
         {/* CardVerify (#8:40 / #20:1313) */}
         <div className="w-full bg-white rounded-[14px] lg:rounded-[12px] p-5 lg:p-6 flex flex-col justify-between gap-4">
@@ -160,6 +211,61 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onNavigateToTab }) => {
           </div>
         ))}
       </div>
+
+      {/* Выбор данных для изменения */}
+      {viewMode === "select-edit" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="fixed inset-0 bg-[#0A0F17]/50 backdrop-blur-xs transition-opacity"
+            onClick={() => setViewMode("main")}
+          />
+          <div className="relative w-full max-w-[400px] bg-white rounded-[16px] p-6 shadow-xl z-10 flex flex-col gap-4 border border-[#E5E8ED]">
+            <div className="flex items-center justify-between">
+              <h3 className="text-[18px] font-bold text-[#14171C]">
+                Что вы хотите изменить?
+              </h3>
+              <button
+                type="button"
+                onClick={() => setViewMode("main")}
+                className="w-8 h-8 rounded-full bg-[#F2F5F7] flex items-center justify-center text-[#666B73] hover:bg-[#E5E8ED] transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-2.5 pt-1">
+              <button
+                type="button"
+                onClick={() => setViewMode("edit-phone")}
+                className="w-full h-[52px] px-4 rounded-[10px] bg-[#F2F5F7] hover:bg-[#E5E8ED] flex items-center justify-between text-left transition-colors cursor-pointer"
+              >
+                <div className="flex flex-col">
+                  <span className="text-[14px] font-semibold text-[#14171C]">
+                    Номер телефона
+                  </span>
+                  <span className="text-[12px] text-[#8C9199]">{phone}</span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-[#8C9199]" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setViewMode("edit-email")}
+                className="w-full h-[52px] px-4 rounded-[10px] bg-[#F2F5F7] hover:bg-[#E5E8ED] flex items-center justify-between text-left transition-colors cursor-pointer"
+              >
+                <div className="flex flex-col">
+                  <span className="text-[14px] font-semibold text-[#14171C]">
+                    Электронную почту (E-mail)
+                  </span>
+                  <span className="text-[12px] text-[#8C9199]">{email}</span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-[#8C9199]" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+

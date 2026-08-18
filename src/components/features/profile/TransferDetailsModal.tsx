@@ -1,7 +1,9 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import { X, CheckCircle2, Copy, Download } from "lucide-react";
+
 
 export interface HistoryTransaction {
   id: string;
@@ -39,6 +41,7 @@ export const TransferDetailsModal: React.FC<TransferDetailsModalProps> = ({
   transaction,
   onRepeatTransfer,
 }) => {
+  const router = useRouter();
   if (!isOpen || !transaction) return null;
 
   const copyToClipboard = (text: string) => {
@@ -63,7 +66,7 @@ export const TransferDetailsModal: React.FC<TransferDetailsModalProps> = ({
           </h3>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-[#F2F5F7] flex items-center justify-center text-[#666B73] hover:bg-[#E5E8ED] transition-colors"
+            className="w-8 h-8 rounded-full bg-[#F2F5F7] flex items-center justify-center text-[#666B73] hover:bg-[#E5E8ED] transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -98,61 +101,60 @@ export const TransferDetailsModal: React.FC<TransferDetailsModalProps> = ({
           </div>
         </div>
 
-        {/* Requisites Details */}
-        <div className="flex flex-col gap-2 text-[13px] text-[#4D5259] p-4 rounded-[12px] bg-[#F7FAFC] border border-[#EEF2F5]">
+        {/* Info Rows */}
+        <div className="flex flex-col gap-2.5 text-[13px] border-y border-[#F2F5F7] py-3 text-[#40454D]">
           <div className="flex justify-between">
             <span className="text-[#8C9199]">Дата и время:</span>
-            <span className="font-semibold text-[#14171C]">
+            <span className="font-medium text-[#14171C]">
               {transaction.date}, {transaction.time}
             </span>
           </div>
           <div className="flex justify-between">
             <span className="text-[#8C9199]">Получатель:</span>
-            <span className="font-semibold text-[#14171C]">
+            <span className="font-medium text-[#14171C]">
               {transaction.recipientName}
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-[#8C9199]">Страна назначения:</span>
-            <span className="font-semibold text-[#14171C]">
+            <span className="text-[#8C9199]">Страна получения:</span>
+            <span className="font-medium text-[#14171C]">
               {transaction.recipientCountry}
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-[#8C9199]">Банк получателя:</span>
-            <span className="font-semibold text-[#14171C]">
+            <span className="text-[#8C9199]">Банк получения:</span>
+            <span className="font-medium text-[#14171C]">
               {transaction.recipientBank}
             </span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-[#8C9199]">Счет / Телефон:</span>
-            <div className="flex items-center gap-1.5">
-              <span className="font-semibold text-[#14171C]">
-                {transaction.recipientAccount}
-              </span>
+            <span className="text-[#8C9199]">Счёт / Телефон:</span>
+            <div className="flex items-center gap-1.5 font-medium text-[#14171C]">
+              <span>{transaction.recipientAccount}</span>
               <button
                 onClick={() => copyToClipboard(transaction.recipientAccount)}
-                className="text-[#8C9199] hover:text-[#0D8C47]"
+                className="text-[#0D8C47] hover:text-[#0D6638] cursor-pointer"
+                title="Скопировать"
               >
                 <Copy className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
           <div className="flex justify-between">
-            <span className="text-[#8C9199]">Источник списания:</span>
-            <span className="font-semibold text-[#14171C]">
+            <span className="text-[#8C9199]">Списано с карты:</span>
+            <span className="font-medium text-[#14171C]">
               {transaction.sourceBank}
             </span>
           </div>
           <div className="flex justify-between">
             <span className="text-[#8C9199]">Курс перевода:</span>
-            <span className="font-semibold text-[#14171C]">
+            <span className="font-medium text-[#14171C]">
               1 RUB = {transaction.rate} {transaction.receiveCurrency}
             </span>
           </div>
           <div className="flex justify-between">
             <span className="text-[#8C9199]">Комиссия сервиса:</span>
-            <span className="font-semibold text-[#0D8C47]">
+            <span className="font-medium text-[#0D8C47]">
               {transaction.fee} ₽ (0%)
             </span>
           </div>
@@ -165,7 +167,7 @@ export const TransferDetailsModal: React.FC<TransferDetailsModalProps> = ({
             onClick={() => {
               alert(`Квитанция по переводу №${transaction.orderNumber} скачивается...`);
             }}
-            className="flex-1 h-[48px] rounded-[10px] bg-[#F2F5F7] hover:bg-[#E5E8ED] text-[#14171C] text-[14px] font-semibold flex items-center justify-center gap-2 transition-colors"
+            className="flex-1 h-[48px] rounded-[10px] bg-[#F2F5F7] hover:bg-[#E5E8ED] text-[#14171C] text-[14px] font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
           >
             <Download className="w-4 h-4" />
             <span>Квитанция PDF</span>
@@ -174,10 +176,14 @@ export const TransferDetailsModal: React.FC<TransferDetailsModalProps> = ({
           <button
             type="button"
             onClick={() => {
-              if (onRepeatTransfer) onRepeatTransfer(transaction);
+              if (onRepeatTransfer) {
+                onRepeatTransfer(transaction);
+              } else {
+                router.push(`/transfer?country=${encodeURIComponent(transaction.recipientCountry)}&recipient=${encodeURIComponent(transaction.recipientName)}&amount=${transaction.sendAmount}`);
+              }
               onClose();
             }}
-            className="flex-1 h-[48px] rounded-[10px] bg-[#0D8C47] hover:bg-[#0D6638] text-white text-[14px] font-semibold flex items-center justify-center transition-colors shadow-xs"
+            className="flex-1 h-[48px] rounded-[10px] bg-[#0D8C47] hover:bg-[#0D6638] text-white text-[14px] font-semibold flex items-center justify-center transition-colors shadow-xs cursor-pointer"
           >
             Повторить перевод
           </button>

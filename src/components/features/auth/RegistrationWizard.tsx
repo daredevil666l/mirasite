@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown, Calendar } from "lucide-react";
+
 import { getAssetPath } from "@/lib/utils";
 
 const CITIZENSHIP_OPTIONS = [
@@ -50,6 +51,7 @@ export const RegistrationWizard: React.FC = () => {
     useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
   ];
+  const dateInputRef = useRef<HTMLInputElement>(null);
 
   // Обратный отсчет таймера для SMS
   useEffect(() => {
@@ -76,6 +78,43 @@ export const RegistrationWizard: React.FC = () => {
       if (raw.length > 8) formatted += " " + raw.slice(8, 10);
     }
     setPhone(formatted);
+  };
+
+  // Форматирование фамилии и имени (только буквы)
+  const handleSurnameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/[^a-zA-Zа-яА-ЯёЁ\s-]/g, "");
+    setSurname(val);
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/[^a-zA-Zа-яА-ЯёЁ\s-]/g, "");
+    setName(val);
+  };
+
+  // Форматирование номера документа по типу гражданства
+  const handleDocNumChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value;
+    if (citizenship === "Россия") {
+      const raw = val.replace(/\D/g, "").slice(0, 10);
+      if (raw.length > 4) {
+        val = `${raw.slice(0, 4)} ${raw.slice(4)}`;
+      } else {
+        val = raw;
+      }
+    } else if (citizenship === "Узбекистан" || citizenship === "Беларусь" || citizenship === "Кыргызстан") {
+      const letters = val.replace(/[^a-zA-Z]/g, "").slice(0, 2).toUpperCase();
+      const digits = val.replace(/\D/g, "").slice(0, 7);
+      if (letters.length > 0 && digits.length > 0) {
+        val = `${letters} ${digits}`;
+      } else if (letters.length > 0) {
+        val = letters;
+      } else {
+        val = digits;
+      }
+    } else {
+      val = val.replace(/[^a-zA-Z0-9\s]/g, "").slice(0, 18).toUpperCase();
+    }
+    setDocNum(val);
   };
 
   // Ввод кода
@@ -118,9 +157,22 @@ export const RegistrationWizard: React.FC = () => {
       }
       setStep(4);
     } else if (step === 4) {
-      if (!surname || !name) {
-        alert("Пожалуйста, заполните фамилию и имя");
+      if (surname.trim().length < 2 || name.trim().length < 2) {
+        alert("Пожалуйста, укажите корректные фамилию и имя (минимум 2 буквы)");
         return;
+      }
+      if (docNum.trim().length < 4) {
+        alert("Пожалуйста, укажите корректные серию и номер документа");
+        return;
+      }
+      if (docExpiry) {
+        const expDate = new Date(docExpiry);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (expDate < today) {
+          alert("Срок действия документа не может быть в прошлом");
+          return;
+        }
       }
       setStep(5);
     } else if (step === 5) {
@@ -138,6 +190,7 @@ export const RegistrationWizard: React.FC = () => {
       window.location.href = "/";
     }
   };
+
 
   const progressPercent = Math.round((step / 6) * 100);
 
@@ -350,21 +403,21 @@ export const RegistrationWizard: React.FC = () => {
               </p>
             </div>
 
-            {/* 4 поля 2x2 (#11:723, #11:724: Фамилия, Имя, Серия и номер, Срок действия) */}
+            {/* 4 поля 2x2 (#11:723, #11:724: Фамилия, Имя, Серия и номер, Срок действия с календарем) */}
             <div className="flex flex-col gap-3">
               <div className="grid grid-cols-2 gap-3">
                 <input
                   type="text"
                   placeholder="Фамилия"
                   value={surname}
-                  onChange={(e) => setSurname(e.target.value)}
+                  onChange={handleSurnameChange}
                   className="w-full h-[50px] rounded-[10px] bg-[#F2F5F7] px-4 text-[14px] font-medium text-[#14171C] placeholder-[#8C9199] focus:bg-white focus:ring-2 focus:ring-[#0D8C47] focus:outline-none transition-all"
                 />
                 <input
                   type="text"
                   placeholder="Имя"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={handleNameChange}
                   className="w-full h-[50px] rounded-[10px] bg-[#F2F5F7] px-4 text-[14px] font-medium text-[#14171C] placeholder-[#8C9199] focus:bg-white focus:ring-2 focus:ring-[#0D8C47] focus:outline-none transition-all"
                 />
               </div>
@@ -372,20 +425,41 @@ export const RegistrationWizard: React.FC = () => {
               <div className="grid grid-cols-2 gap-3">
                 <input
                   type="text"
-                  placeholder="Серия и номер"
+                  placeholder={
+                    citizenship === "Россия"
+                      ? "Серия и номер"
+                      : citizenship === "Узбекистан"
+                      ? "Серия и номер"
+                      : "Серия и номер"
+                  }
                   value={docNum}
-                  onChange={(e) => setDocNum(e.target.value)}
+                  onChange={handleDocNumChange}
                   className="w-full h-[50px] rounded-[10px] bg-[#F2F5F7] px-4 text-[14px] font-medium text-[#14171C] placeholder-[#8C9199] focus:bg-white focus:ring-2 focus:ring-[#0D8C47] focus:outline-none transition-all"
                 />
-                <input
-                  type="text"
-                  placeholder="Срок действия"
-                  value={docExpiry}
-                  onChange={(e) => setDocExpiry(e.target.value)}
-                  className="w-full h-[50px] rounded-[10px] bg-[#F2F5F7] px-4 text-[14px] font-medium text-[#14171C] placeholder-[#8C9199] focus:bg-white focus:ring-2 focus:ring-[#0D8C47] focus:outline-none transition-all"
-                />
+                <div
+                  className="relative w-full h-[50px] rounded-[10px] bg-[#F2F5F7] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#0D8C47] transition-all flex items-center cursor-pointer"
+                  onClick={() => {
+                    try {
+                      dateInputRef.current?.showPicker();
+                    } catch {
+                      dateInputRef.current?.focus();
+                    }
+                  }}
+                >
+                  <input
+                    ref={dateInputRef}
+                    type="date"
+                    min={new Date().toISOString().split("T")[0]}
+                    value={docExpiry}
+                    onChange={(e) => setDocExpiry(e.target.value)}
+                    placeholder="Срок действия"
+                    className="w-full h-full bg-transparent px-4 pr-9 text-[14px] font-medium text-[#14171C] focus:outline-none cursor-pointer"
+                  />
+                  <Calendar className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8C9199] pointer-events-none" />
+                </div>
               </div>
             </div>
+
 
             {/* SubmitButton (#11:733: "Продолжить") */}
             <button
