@@ -100,6 +100,7 @@ export const TransferWizard: React.FC<TransferWizardProps> = ({
 
   // Шаг 3: Данные получателя (пустые по умолчанию)
   const [recipientPhone, setRecipientPhone] = useState<string>("");
+  const [cardNumber, setCardNumber] = useState<string>("");
   const [recipientFirstName, setRecipientFirstName] = useState<string>("");
   const [recipientLastName, setRecipientLastName] = useState<string>("");
 
@@ -155,8 +156,6 @@ export const TransferWizard: React.FC<TransferWizardProps> = ({
     }
   }, [country]);
 
-
-
   useEffect(() => {
     const calculated = Math.round(sendAmount * currentRate);
     setReceiveAmount(calculated);
@@ -165,9 +164,9 @@ export const TransferWizard: React.FC<TransferWizardProps> = ({
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (step === 5 && rateTimer > 0) {
+    if ((step === 5 || step === 6) && rateTimer > 0) {
       interval = setInterval(() => {
-        setRateTimer((prev) => prev - 1);
+        setRateTimer((prev) => (prev > 0 ? prev - 1 : 0));
       }, 1000);
     }
     return () => clearInterval(interval);
@@ -197,6 +196,27 @@ export const TransferWizard: React.FC<TransferWizardProps> = ({
     }
   };
 
+  const handleRecipientPhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let raw = e.target.value.replace(/\D/g, "");
+    if (raw.startsWith("998")) raw = raw.slice(3);
+    raw = raw.slice(0, 9);
+
+    let formatted = "";
+    if (raw.length > 0) {
+      formatted = raw.slice(0, 2);
+      if (raw.length > 2) formatted += " " + raw.slice(2, 5);
+      if (raw.length > 5) formatted += " " + raw.slice(5, 7);
+      if (raw.length > 7) formatted += " " + raw.slice(7, 9);
+    }
+    setRecipientPhone(formatted);
+  };
+
+  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/\D/g, "").slice(0, 16);
+    const formatted = raw.replace(/(\d{4})(?=\d)/g, "$1 ");
+    setCardNumber(formatted);
+  };
+
   const handleCurrencySelect = (currency: Currency) => {
     const foundEntry = Object.entries(CURRENCY_RATES).find(
       ([, val]) => val.code === currency.code
@@ -223,7 +243,7 @@ export const TransferWizard: React.FC<TransferWizardProps> = ({
       {isModal && onClose && (
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 w-8 h-8 rounded-full bg-[#F2F5F7] flex items-center justify-center text-[#666B73] hover:bg-[#E5E8ED] transition-colors"
+          className="absolute top-5 right-5 w-8 h-8 rounded-full bg-[#F2F5F7] flex items-center justify-center text-[#666B73] hover:bg-[#E5E8ED] transition-colors cursor-pointer"
           aria-label="Закрыть"
         >
           <X className="w-4 h-4" />
@@ -235,7 +255,7 @@ export const TransferWizard: React.FC<TransferWizardProps> = ({
         {step > 1 ? (
           <button
             onClick={() => setStep((prev) => prev - 1)}
-            className="flex items-center gap-1 text-[13px] font-semibold text-[#0D8C47] hover:underline"
+            className="flex items-center gap-1 text-[13px] font-semibold text-[#0D8C47] hover:underline cursor-pointer"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Перевод в {country}</span>
@@ -271,7 +291,7 @@ export const TransferWizard: React.FC<TransferWizardProps> = ({
           <button
             type="button"
             onClick={() => setIsCurrencyModalOpen(true)}
-            className="w-full h-[50px] px-4 rounded-[10px] bg-[#F2F5F7] hover:bg-[#E5E8ED] transition-colors flex items-center justify-between text-left focus:outline-none"
+            className="w-full h-[50px] px-4 rounded-[10px] bg-[#F2F5F7] hover:bg-[#E5E8ED] transition-colors flex items-center justify-between text-left focus:outline-none cursor-pointer"
           >
             <span className="text-[15px] font-semibold text-[#333840]">
               {country} · {currentCurrencyCode}
@@ -318,7 +338,7 @@ export const TransferWizard: React.FC<TransferWizardProps> = ({
           <button
             type="button"
             onClick={() => setStep(2)}
-            className="w-full h-[50px] bg-[#0D8C47] hover:bg-[#0D6638] text-white text-[15px] font-semibold rounded-[10px] flex items-center justify-center transition-colors shadow-sm active:scale-[0.98] mt-1"
+            className="w-full h-[50px] bg-[#0D8C47] hover:bg-[#0D6638] text-white text-[15px] font-semibold rounded-[10px] flex items-center justify-center transition-colors shadow-sm active:scale-[0.98] mt-1 cursor-pointer"
           >
             Продолжить
           </button>
@@ -337,7 +357,7 @@ export const TransferWizard: React.FC<TransferWizardProps> = ({
             <button
               type="button"
               onClick={() => setActiveTab("all")}
-              className={`h-[36px] px-4 rounded-[8px] text-[13px] font-semibold transition-colors ${
+              className={`h-[36px] px-4 rounded-[8px] text-[13px] font-semibold transition-colors cursor-pointer ${
                 activeTab === "all"
                   ? "bg-[#0D8C47] text-white"
                   : "bg-[#F2F5F7] text-[#666B73] hover:text-[#14171C]"
@@ -348,7 +368,7 @@ export const TransferWizard: React.FC<TransferWizardProps> = ({
             <button
               type="button"
               onClick={() => setActiveTab("card")}
-              className={`h-[36px] px-4 rounded-[8px] text-[13px] font-semibold transition-colors ${
+              className={`h-[36px] px-4 rounded-[8px] text-[13px] font-semibold transition-colors cursor-pointer ${
                 activeTab === "card"
                   ? "bg-[#0D8C47] text-white"
                   : "bg-[#F2F5F7] text-[#666B73] hover:text-[#14171C]"
@@ -359,7 +379,7 @@ export const TransferWizard: React.FC<TransferWizardProps> = ({
             <button
               type="button"
               onClick={() => setActiveTab("phone")}
-              className={`h-[36px] px-4 rounded-[8px] text-[13px] font-semibold transition-colors ${
+              className={`h-[36px] px-4 rounded-[8px] text-[13px] font-semibold transition-colors cursor-pointer ${
                 activeTab === "phone"
                   ? "bg-[#0D8C47] text-white"
                   : "bg-[#F2F5F7] text-[#666B73] hover:text-[#14171C]"
@@ -369,7 +389,7 @@ export const TransferWizard: React.FC<TransferWizardProps> = ({
             </button>
           </div>
 
-          {/* Bank rows (#11:822: Hamkorbank, Agrobank, Aloqabank) */}
+          {/* Bank rows (#11:822: Hamkorbank, Agrobank, Aloqabank) — многострочный вывод */}
           <div className="flex flex-col gap-2.5 my-1">
             {availableBanks.slice(0, 3).map((bank) => {
               const isSelected = selectedBank === bank.name;
@@ -377,7 +397,7 @@ export const TransferWizard: React.FC<TransferWizardProps> = ({
                 <div
                   key={bank.id}
                   onClick={() => setSelectedBank(bank.name)}
-                  className={`w-full h-[50px] px-4 rounded-[10px] flex items-center justify-between cursor-pointer transition-all ${
+                  className={`w-full min-h-[58px] py-2.5 px-4 rounded-[10px] flex flex-col justify-center items-start gap-0.5 cursor-pointer transition-all ${
                     isSelected
                       ? "border-[1.5px] border-[#0D8C47] bg-[#F2FAF5]"
                       : "border border-[#E5E8ED] bg-white hover:bg-[#F7FAFC]"
@@ -397,21 +417,75 @@ export const TransferWizard: React.FC<TransferWizardProps> = ({
           <button
             type="button"
             onClick={() => setStep(3)}
-            className="w-full h-[50px] bg-[#0D8C47] hover:bg-[#0D6638] text-white text-[15px] font-semibold rounded-[10px] flex items-center justify-center transition-colors shadow-sm active:scale-[0.98] mt-1"
+            className="w-full h-[50px] bg-[#0D8C47] hover:bg-[#0D6638] text-white text-[15px] font-semibold rounded-[10px] flex items-center justify-center transition-colors shadow-sm active:scale-[0.98] mt-1 cursor-pointer"
           >
             Продолжить
           </button>
         </div>
       )}
 
-      {/* ================= ШАГ 3: Данные получателя (#11:833 / #13:1102) ================= */}
-      {step === 3 && (
+      {/* ================= ШАГ 3: Номер карты получателя (Вкладка "На карту") ================= */}
+      {step === 3 && activeTab === "card" && (
+        <div className="flex flex-col gap-4">
+          <h2 className="text-[24px] font-bold text-[#14171C]">
+            Номер карты получателя
+          </h2>
+
+          {/* CardNumberField */}
+          <div className="w-full h-[50px] rounded-[10px] bg-[#F2F5F7] px-4 flex items-center gap-2 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#0D8C47] transition-all">
+            <input
+              type="text"
+              inputMode="numeric"
+              value={cardNumber}
+              onChange={handleCardNumberChange}
+              placeholder="4998 8909 8989 7897"
+              maxLength={19}
+              autoFocus
+              className="w-full bg-transparent text-[15px] font-semibold text-[#14171C] placeholder-[#8C9199] focus:outline-none tracking-wide"
+            />
+          </div>
+
+          {/* Название банка выпустившего карту */}
+          <div className="text-[12px] font-bold text-[#8C9199] tracking-wider uppercase pl-1 -mt-2">
+            {selectedBank ? selectedBank.toUpperCase() : "HAMKOR BANK"}
+          </div>
+
+          {/* NameRow: Имя (латиницей) + Фамилия (латиницей) */}
+          <div className="flex flex-col gap-3">
+            <input
+              type="text"
+              value={recipientFirstName}
+              onChange={(e) => setRecipientFirstName(e.target.value.replace(/[^a-zA-Z\s]/g, ""))}
+              placeholder="Имя получателя (латиницей)"
+              className="w-full h-[50px] rounded-[10px] bg-[#F2F5F7] px-4 text-[14px] font-medium text-[#14171C] placeholder-[#8C9199] focus:bg-white focus:ring-2 focus:ring-[#0D8C47] focus:outline-none transition-all"
+            />
+            <input
+              type="text"
+              value={recipientLastName}
+              onChange={(e) => setRecipientLastName(e.target.value.replace(/[^a-zA-Z\s]/g, ""))}
+              placeholder="Фамилия получателя (латиницей)"
+              className="w-full h-[50px] rounded-[10px] bg-[#F2F5F7] px-4 text-[14px] font-medium text-[#14171C] placeholder-[#8C9199] focus:bg-white focus:ring-2 focus:ring-[#0D8C47] focus:outline-none transition-all"
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setStep(4)}
+            className="w-full h-[50px] bg-[#0D8C47] hover:bg-[#0D6638] text-white text-[15px] font-semibold rounded-[10px] flex items-center justify-center transition-colors shadow-sm active:scale-[0.98] mt-1 cursor-pointer"
+          >
+            Продолжить
+          </button>
+        </div>
+      )}
+
+      {/* ================= ШАГ 3: Данные получателя (Вкладки "Все" / "По телефону") ================= */}
+      {step === 3 && activeTab !== "card" && (
         <div className="flex flex-col gap-4">
           <h2 className="text-[24px] font-bold text-[#14171C]">
             Данные получателя
           </h2>
 
-          {/* PhoneField (#11:858: prefix +998, placeholder "Номер телефона получателя") */}
+          {/* PhoneField (#11:858: prefix +998, placeholder "90 123 45 67") */}
           <div className="w-full h-[50px] rounded-[10px] bg-[#F2F5F7] px-4 flex items-center gap-2 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#0D8C47] transition-all">
             <span className="text-[15px] font-semibold text-[#14171C] select-none">
               +998
@@ -419,8 +493,10 @@ export const TransferWizard: React.FC<TransferWizardProps> = ({
             <input
               type="tel"
               value={recipientPhone}
-              onChange={(e) => setRecipientPhone(e.target.value)}
-              placeholder="Номер телефона получателя"
+              onChange={handleRecipientPhoneChange}
+              maxLength={12}
+              autoFocus
+              placeholder="90 123 45 67"
               className="w-full bg-transparent text-[15px] font-medium text-[#14171C] placeholder-[#8C9199] focus:outline-none"
             />
           </div>
@@ -430,14 +506,14 @@ export const TransferWizard: React.FC<TransferWizardProps> = ({
             <input
               type="text"
               value={recipientFirstName}
-              onChange={(e) => setRecipientFirstName(e.target.value)}
+              onChange={(e) => setRecipientFirstName(e.target.value.replace(/[^a-zA-Z\s]/g, ""))}
               placeholder="Имя (латиницей)"
               className="w-full h-[50px] rounded-[10px] bg-[#F2F5F7] px-4 text-[13px] font-medium text-[#14171C] placeholder-[#8C9199] focus:bg-white focus:ring-2 focus:ring-[#0D8C47] focus:outline-none transition-all"
             />
             <input
               type="text"
               value={recipientLastName}
-              onChange={(e) => setRecipientLastName(e.target.value)}
+              onChange={(e) => setRecipientLastName(e.target.value.replace(/[^a-zA-Z\s]/g, ""))}
               placeholder="Фамилия (латиницей)"
               className="w-full h-[50px] rounded-[10px] bg-[#F2F5F7] px-4 text-[13px] font-medium text-[#14171C] placeholder-[#8C9199] focus:bg-white focus:ring-2 focus:ring-[#0D8C47] focus:outline-none transition-all"
             />
@@ -446,7 +522,7 @@ export const TransferWizard: React.FC<TransferWizardProps> = ({
           <button
             type="button"
             onClick={() => setStep(4)}
-            className="w-full h-[50px] bg-[#0D8C47] hover:bg-[#0D6638] text-white text-[15px] font-semibold rounded-[10px] flex items-center justify-center transition-colors shadow-sm active:scale-[0.98] mt-1"
+            className="w-full h-[50px] bg-[#0D8C47] hover:bg-[#0D6638] text-white text-[15px] font-semibold rounded-[10px] flex items-center justify-center transition-colors shadow-sm active:scale-[0.98] mt-1 cursor-pointer"
           >
             Продолжить
           </button>
@@ -491,7 +567,7 @@ export const TransferWizard: React.FC<TransferWizardProps> = ({
           <button
             type="button"
             onClick={() => setStep(5)}
-            className="w-full h-[50px] bg-[#0D8C47] hover:bg-[#0D6638] text-white text-[15px] font-semibold rounded-[10px] flex items-center justify-center transition-colors shadow-sm active:scale-[0.98] mt-1"
+            className="w-full h-[50px] bg-[#0D8C47] hover:bg-[#0D6638] text-white text-[15px] font-semibold rounded-[10px] flex items-center justify-center transition-colors shadow-sm active:scale-[0.98] mt-1 cursor-pointer"
           >
             Продолжить
           </button>
@@ -522,24 +598,38 @@ export const TransferWizard: React.FC<TransferWizardProps> = ({
             Курс: 1 RUB = {currentRate.toString().replace(".", ",")} {currentCurrencyCode}
           </p>
 
-          {/* DetailsCard (#104:140: bg #F7FAFC, padding 16px, gap 10px, text #4D5259 Inter 13px Regular) */}
+          {/* DetailsCard (#104:140: bg #F7FAFC, padding 16px, gap 10px, text #4D5259 Inter 13px) */}
           <div className="w-full p-4 rounded-[10px] bg-[#F7FAFC] flex flex-col gap-2.5 text-[13px] text-[#4D5259]">
             <p>
-              Получатель:&nbsp;&nbsp;{recipientLastName || "Ismoilov"} {recipientFirstName || "Sherzod"}
+              <span>Получатель:&nbsp;&nbsp;</span>
+              <span className="font-bold text-[#14171C]">
+                {recipientLastName || "Ismoilov"} {recipientFirstName || "Sherzod"}
+              </span>
             </p>
             <p>
-              Банк получателя:&nbsp;&nbsp;{selectedBank}
+              <span>Банк получателя:&nbsp;&nbsp;</span>
+              <span className="font-bold text-[#14171C]">
+                {activeTab === "card" && cardNumber
+                  ? `${selectedBank} (${cardNumber.slice(0, 4)} •••• ${cardNumber.slice(-4)})`
+                  : selectedBank}
+              </span>
             </p>
             <p>
-              Списание:&nbsp;&nbsp;{selectedSource}, карта •• 4521
+              <span>Списание:&nbsp;&nbsp;</span>
+              <span className="font-bold text-[#14171C]">
+                {selectedSource}
+              </span>
             </p>
             <p>
-              Комиссия:&nbsp;&nbsp;0 ₽
+              <span>Комиссия:&nbsp;&nbsp;</span>
+              <span className="font-bold text-[#14171C]">
+                0 ₽
+              </span>
             </p>
           </div>
 
-          {/* Курс действителен (#104:145: Inter SemiBold 13px, #BF800D) */}
-          <p className="text-[13px] font-semibold text-[#BF800D]">
+          {/* Курс действителен (центрированный) */}
+          <p className="text-center text-[13px] font-semibold text-[#BF800D]">
             Курс действителен ещё {formatTimer(rateTimer)}
           </p>
 
@@ -547,7 +637,7 @@ export const TransferWizard: React.FC<TransferWizardProps> = ({
           <button
             type="button"
             onClick={() => setStep(6)}
-            className="w-full h-[50px] bg-[#0D8C47] hover:bg-[#0D6638] text-white text-[15px] font-semibold rounded-[10px] flex items-center justify-center transition-colors shadow-sm active:scale-[0.98]"
+            className="w-full h-[50px] bg-[#0D8C47] hover:bg-[#0D6638] text-white text-[15px] font-semibold rounded-[10px] flex items-center justify-center transition-colors shadow-sm active:scale-[0.98] cursor-pointer"
           >
             Подтвердить перевод
           </button>
@@ -564,6 +654,11 @@ export const TransferWizard: React.FC<TransferWizardProps> = ({
             Для завершения перевода перейдите по ссылке ниже
           </p>
 
+          {/* Счетчик обратного отсчета */}
+          <p className="text-center text-[13px] font-semibold text-[#BF800D]">
+            Курс действителен ещё {formatTimer(rateTimer)}
+          </p>
+
           <button
             type="button"
             onClick={() => {
@@ -571,7 +666,7 @@ export const TransferWizard: React.FC<TransferWizardProps> = ({
               if (onClose) onClose();
               else window.location.href = "/";
             }}
-            className="w-full h-[50px] bg-[#0D8C47] hover:bg-[#0D6638] text-white text-[15px] font-semibold rounded-[10px] flex items-center justify-center transition-colors shadow-sm active:scale-[0.98]"
+            className="w-full h-[50px] bg-[#0D8C47] hover:bg-[#0D6638] text-white text-[15px] font-semibold rounded-[10px] flex items-center justify-center transition-colors shadow-sm active:scale-[0.98] cursor-pointer"
           >
             Перейти в приложение банка
           </button>

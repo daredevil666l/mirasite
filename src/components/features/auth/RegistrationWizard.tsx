@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Check, ChevronDown, Calendar } from "lucide-react";
+import { Check, ChevronDown, Calendar, CheckCircle2 } from "lucide-react";
 
 import { getAssetPath } from "@/lib/utils";
 
@@ -178,13 +178,11 @@ export const RegistrationWizard: React.FC = () => {
         alert("Для продолжения необходимо подтвердить согласия");
         return;
       }
-      alert("🎉 Регистрация успешно завершена! Аккаунт создан.");
-      window.location.href = "/";
+      setStep(7);
     }
   };
 
-
-  const progressPercent = Math.round((step / 6) * 100);
+  const progressPercent = step >= 7 ? 100 : Math.round((step / 6) * 100);
 
   return (
     <div className="min-h-screen w-full bg-[#F7FAFC] sm:bg-[#F7FAFC] flex items-center justify-center p-0 sm:p-6 lg:p-10 font-sans antialiased">
@@ -214,7 +212,7 @@ export const RegistrationWizard: React.FC = () => {
 
         {/* Шаг N из 6 (#11:660: Inter SemiBold 12px, #8C9199) */}
         <span className="text-[12px] font-semibold text-[#8C9199] -mt-1">
-          Шаг {step} из 6
+          {step <= 6 ? `Шаг ${step} из 6` : "Регистрация завершена"}
         </span>
 
         {/* ================= ШАГ 1: Телефон (#11:655 / #11:940) ================= */}
@@ -577,10 +575,59 @@ export const RegistrationWizard: React.FC = () => {
             <button
               type="button"
               onClick={handleNextStep}
-              className="w-full h-[50px] bg-[#0D8C47] hover:bg-[#0D6638] text-white text-[15px] font-semibold rounded-[10px] flex items-center justify-center transition-colors shadow-sm active:scale-[0.98] mt-1"
+              className="w-full h-[50px] bg-[#0D8C47] hover:bg-[#0D6638] text-white text-[15px] font-semibold rounded-[10px] flex items-center justify-center transition-colors shadow-sm active:scale-[0.98] mt-1 cursor-pointer"
             >
               Завершить регистрацию
             </button>
+          </div>
+        )}
+
+        {/* ================= ШАГ 7: Экран успеха ================= */}
+        {step === 7 && (
+          <div className="flex flex-col items-center text-center gap-5 py-2">
+            <div className="w-16 h-16 rounded-full bg-[#E3F7EB] text-[#0D8C47] flex items-center justify-center shadow-xs">
+              <CheckCircle2 className="w-9 h-9 stroke-[2.5]" />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <h1 className="text-[22px] sm:text-[24px] font-bold text-[#14171C]">
+                Регистрация успешно завершена!
+              </h1>
+              <p className="text-[14px] text-[#666B73] leading-relaxed max-w-[360px]">
+                Ваш аккаунт создан. Теперь вам доступны мгновенные денежные переводы по выгодному курсу.
+              </p>
+            </div>
+
+            {/* Сводка данных */}
+            <div className="w-full bg-[#F7FAFC] rounded-[12px] p-4 flex flex-col gap-2 text-[13px] text-left border border-[#E5E8ED]">
+              <div className="flex justify-between items-center">
+                <span className="text-[#8C9199]">Телефон:</span>
+                <span className="font-semibold text-[#14171C]">+7 {phone}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-[#8C9199]">ФИО:</span>
+                <span className="font-semibold text-[#14171C]">{surname} {name}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-[#8C9199]">Гражданство:</span>
+                <span className="font-semibold text-[#14171C]">{citizenship}</span>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2.5 w-full mt-2">
+              <Link
+                href="/dashboard"
+                className="w-full h-[50px] bg-[#0D8C47] hover:bg-[#0D6638] text-white text-[15px] font-semibold rounded-[10px] flex items-center justify-center transition-colors shadow-sm active:scale-[0.98]"
+              >
+                Перейти в личный кабинет
+              </Link>
+              <Link
+                href="/"
+                className="w-full h-[46px] bg-[#F2F5F7] hover:bg-[#E5E8ED] text-[#40454D] text-[14px] font-semibold rounded-[10px] flex items-center justify-center transition-colors"
+              >
+                На главную
+              </Link>
+            </div>
           </div>
         )}
       </div>

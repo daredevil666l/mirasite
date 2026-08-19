@@ -26,7 +26,6 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onNavigateToTab }) => {
         onBack={() => setViewMode("main")}
         onSuccess={(newPhone) => {
           setPhone(newPhone);
-          setViewMode("main");
         }}
       />
     );
@@ -39,7 +38,6 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onNavigateToTab }) => {
         onBack={() => setViewMode("main")}
         onSuccess={(newEmail) => {
           setEmail(newEmail);
-          setViewMode("main");
         }}
       />
     );
