@@ -116,11 +116,37 @@ export const TransferWizard: React.FC<TransferWizardProps> = ({
       const qCountry = searchParams.get("country");
       const qRecipient = searchParams.get("recipient");
       const qAmount = searchParams.get("amount");
+      const qBank = searchParams.get("bank");
+      const qAccount = searchParams.get("account");
+      const qTab = searchParams.get("tab");
+      const qRepeat = searchParams.get("repeat");
+      const qStep = searchParams.get("step");
 
-      if (qCountry && CURRENCY_RATES[qCountry]) {
-        setCountry(qCountry);
-      } else if (initialCountryName) {
-        setCountry(initialCountryName);
+      let resolvedCountry = initialCountryName;
+      if (qCountry) {
+        if (CURRENCY_RATES[qCountry]) {
+          resolvedCountry = qCountry;
+        } else {
+          // If country name doesn't match keys directly, find closest or fallback
+          const found = Object.keys(CURRENCY_RATES).find((k) =>
+            k.toLowerCase().includes(qCountry.toLowerCase()) || qCountry.toLowerCase().includes(k.toLowerCase())
+          );
+          resolvedCountry = found || "Узбекистан";
+        }
+        setCountry(resolvedCountry);
+      }
+
+      const activeRate = CURRENCY_RATES[resolvedCountry]?.rate || 153.66;
+
+      if (qAmount) {
+        const parsed = parseInt(qAmount.replace(/\D/g, ""), 10);
+        if (!isNaN(parsed) && parsed > 0) {
+          setSendAmount(parsed);
+          setSendInput(formatMoney(parsed));
+          const rec = Math.round(parsed * activeRate);
+          setReceiveAmount(rec);
+          setReceiveInput(formatMoney(rec));
+        }
       }
 
       if (qRecipient) {
@@ -130,19 +156,43 @@ export const TransferWizard: React.FC<TransferWizardProps> = ({
           setRecipientFirstName(parts.slice(1).join(" "));
         } else {
           setRecipientFirstName(qRecipient);
+          setRecipientLastName("");
         }
       }
 
-      if (qAmount) {
-        const parsed = parseInt(qAmount.replace(/\D/g, ""), 10);
-        if (!isNaN(parsed) && parsed > 0) {
-          setSendAmount(parsed);
-          setSendInput(formatMoney(parsed));
-          const rate = (qCountry && CURRENCY_RATES[qCountry]?.rate) || currentRate;
-          const rec = Math.round(parsed * rate);
-          setReceiveAmount(rec);
-          setReceiveInput(formatMoney(rec));
+      if (qBank) {
+        setSelectedBank(qBank);
+      }
+
+      if (qTab === "card" || qTab === "phone") {
+        setActiveTab(qTab);
+      }
+
+      if (qAccount) {
+        const cleanDigits = qAccount.replace(/\D/g, "");
+        if (cleanDigits.length >= 16) {
+          setActiveTab("card");
+          const formatted = cleanDigits.slice(0, 16).replace(/(\d{4})(?=\d)/g, "$1 ");
+          setCardNumber(formatted);
+        } else if (cleanDigits.length >= 7) {
+          setActiveTab("phone");
+          let raw = cleanDigits;
+          if (raw.startsWith("998")) raw = raw.slice(3);
+          else if (raw.startsWith("7") || raw.startsWith("8")) raw = raw.slice(1);
+          let formatted = "";
+          if (raw.length > 0) {
+            formatted = raw.slice(0, 2);
+            if (raw.length > 2) formatted += " " + raw.slice(2, 5);
+            if (raw.length > 5) formatted += " " + raw.slice(5, 7);
+            if (raw.length > 7) formatted += " " + raw.slice(7, 9);
+          }
+          setRecipientPhone(formatted);
         }
+      }
+
+      // Если это сценарий "Повторить" (repeat=1 или step=5) -> открываем предзаполненную форму на шаге 5 с актуальным курсом
+      if (qRepeat === "1" || qStep === "5") {
+        setStep(5);
       }
     } else if (initialCountryName) {
       setCountry(initialCountryName);
@@ -603,7 +653,7 @@ export const TransferWizard: React.FC<TransferWizardProps> = ({
             <p>
               <span>Получатель:&nbsp;&nbsp;</span>
               <span className="font-bold text-[#14171C]">
-                {recipientLastName || "Ismoilov"} {recipientFirstName || "Sherzod"}
+                {[recipientLastName, recipientFirstName].filter(Boolean).join(" ") || "Ismoilov Sherzod"}
               </span>
             </p>
             <p>
@@ -611,6 +661,8 @@ export const TransferWizard: React.FC<TransferWizardProps> = ({
               <span className="font-bold text-[#14171C]">
                 {activeTab === "card" && cardNumber
                   ? `${selectedBank} (${cardNumber.slice(0, 4)} •••• ${cardNumber.slice(-4)})`
+                  : activeTab === "phone" && recipientPhone
+                  ? `${selectedBank} (+998 ${recipientPhone})`
                   : selectedBank}
               </span>
             </p>

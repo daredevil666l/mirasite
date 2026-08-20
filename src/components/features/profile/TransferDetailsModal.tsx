@@ -179,7 +179,18 @@ export const TransferDetailsModal: React.FC<TransferDetailsModalProps> = ({
               if (onRepeatTransfer) {
                 onRepeatTransfer(transaction);
               } else {
-                router.push(`/transfer?country=${encodeURIComponent(transaction.recipientCountry)}&recipient=${encodeURIComponent(transaction.recipientName)}&amount=${transaction.sendAmount}`);
+                const isCard = transaction.recipientAccount.replace(/\s/g, "").length >= 16;
+                const params = new URLSearchParams({
+                  country: transaction.recipientCountry,
+                  recipient: transaction.recipientName,
+                  amount: transaction.sendAmount.toString(),
+                  bank: transaction.recipientBank,
+                  account: transaction.recipientAccount,
+                  tab: isCard ? "card" : "phone",
+                  repeat: "1",
+                  step: "5",
+                });
+                router.push(`/transfer?${params.toString()}`);
               }
               onClose();
             }}

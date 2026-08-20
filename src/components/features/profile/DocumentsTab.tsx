@@ -5,12 +5,16 @@ import { ArrowLeft } from "lucide-react";
 import { LEGAL_DOCUMENTS } from "@/data/mockData";
 import { LegalDocument } from "@/types";
 
+interface DocumentsTabProps {
+  onBack?: () => void;
+}
+
 /**
  * Вкладка "Документы" — 100% Pixel-Perfect по нодам Figma:
  * - Desktop (#8:458 / #107:239): "Открыть →"
  * - Mobile (#22:1555 / #107:841): "›"
  */
-export const DocumentsTab: React.FC = () => {
+export const DocumentsTab: React.FC<DocumentsTabProps> = ({ onBack }) => {
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
 
   const selectedDoc = LEGAL_DOCUMENTS.find((d) => d.id === selectedDocId);
@@ -18,10 +22,10 @@ export const DocumentsTab: React.FC = () => {
   if (selectedDoc) {
     return (
       <div className="flex flex-col gap-5 lg:gap-6 w-full max-w-[1064px]">
-        {/* Кнопка возврата */}
+        {/* Кнопка возврата к списку документов */}
         <button
           onClick={() => setSelectedDocId(null)}
-          className="flex items-center gap-1.5 text-[14px] font-semibold text-[#0D8C47] hover:underline self-start"
+          className="flex items-center gap-1.5 text-[14px] font-semibold text-[#0D8C47] hover:underline self-start cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Назад к документам</span>
@@ -38,7 +42,7 @@ export const DocumentsTab: React.FC = () => {
         </div>
 
         {/* Card с секциями текста */}
-        <div className="bg-white rounded-[14px] lg:rounded-[12px] p-6 lg:p-8 flex flex-col gap-6">
+        <div className="bg-white rounded-[14px] lg:rounded-[12px] p-6 lg:p-8 flex flex-col gap-6 border border-[#E5E8ED]">
           {selectedDoc.sections.map((section, idx) => (
             <div key={idx} className="flex flex-col gap-2">
               <h3 className="text-[15px] font-bold text-[#14171C]">
@@ -56,13 +60,25 @@ export const DocumentsTab: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-5 lg:gap-6 w-full max-w-[1064px]">
+      {/* Кнопка возврата в ЛК для мобильной версии */}
+      {onBack && (
+        <button
+          type="button"
+          onClick={onBack}
+          className="lg:hidden flex items-center gap-1.5 text-[14px] font-semibold text-[#0D8C47] hover:underline self-start cursor-pointer -mb-1"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Назад в профиль</span>
+        </button>
+      )}
+
       {/* Заголовок (#8:492 / #22:1557: Inter Bold 24px/28px #14171C) */}
       <h1 className="text-[24px] lg:text-[28px] font-bold text-[#14171C]">
         Документы
       </h1>
 
       {/* DocsCard (#8:519 / #22:1578) */}
-      <div className="w-full bg-white rounded-[14px] lg:rounded-[12px] p-2 flex flex-col divide-y divide-[#F2F5F7]">
+      <div className="w-full bg-white rounded-[14px] lg:rounded-[12px] p-2 flex flex-col divide-y divide-[#F2F5F7] border border-[#E5E8ED]">
         {LEGAL_DOCUMENTS.map((doc) => (
           <div
             key={doc.id}

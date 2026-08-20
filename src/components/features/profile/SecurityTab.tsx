@@ -1,9 +1,11 @@
 "use client";
 
 import React from "react";
+import { ArrowLeft } from "lucide-react";
 
 interface SecurityTabProps {
   onNavigateToTab?: (tab: string) => void;
+  onBack?: () => void;
 }
 
 /**
@@ -11,16 +13,28 @@ interface SecurityTabProps {
  * - Desktop (#8:389)
  * - Mobile (#22:1511)
  */
-export const SecurityTab: React.FC<SecurityTabProps> = ({ onNavigateToTab }) => {
+export const SecurityTab: React.FC<SecurityTabProps> = ({ onNavigateToTab, onBack }) => {
   return (
     <div className="flex flex-col gap-5 lg:gap-6 w-full max-w-[1064px]">
+      {/* Кнопка возврата в ЛК для мобильной версии */}
+      {onBack && (
+        <button
+          type="button"
+          onClick={onBack}
+          className="lg:hidden flex items-center gap-1.5 text-[14px] font-semibold text-[#0D8C47] hover:underline self-start cursor-pointer -mb-1"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Назад в профиль</span>
+        </button>
+      )}
+
       {/* Заголовок (#8:423 / #22:1513: Inter Bold 24px/28px #14171C) */}
       <h1 className="text-[24px] lg:text-[28px] font-bold text-[#14171C]">
         Безопасность
       </h1>
 
       {/* SecurityCard (#8:450 Desktop / #22:1548 Mobile) */}
-      <div className="w-full bg-white rounded-[14px] lg:rounded-[12px] p-5 lg:p-6 flex flex-col gap-3.5 lg:gap-4">
+      <div className="w-full bg-white rounded-[14px] lg:rounded-[12px] p-5 lg:p-6 flex flex-col gap-3.5 lg:gap-4 border border-[#E5E8ED]">
         {/* Title & Badge */}
         <div className="flex flex-col lg:flex-row lg:items-center gap-2 lg:gap-3">
           {/* #8:455 / #22:1549: Inter Bold 16px #14171C */}
@@ -52,7 +66,7 @@ export const SecurityTab: React.FC<SecurityTabProps> = ({ onNavigateToTab }) => 
           <button
             type="button"
             onClick={() => onNavigateToTab && onNavigateToTab("documents")}
-            className="text-[14px] font-semibold text-[#0D8C47] hover:underline text-left"
+            className="text-[14px] font-semibold text-[#0D8C47] hover:underline text-left cursor-pointer"
           >
             Пользовательское соглашение
           </button>

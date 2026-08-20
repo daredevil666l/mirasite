@@ -1,15 +1,20 @@
 "use client";
 
 import React, { useState } from "react";
+import { ArrowLeft } from "lucide-react";
 import { CurrencySelectorModal } from "../calculator/CurrencySelectorModal";
 import { Currency } from "@/types";
+
+interface SettingsTabProps {
+  onBack?: () => void;
+}
 
 /**
  * Вкладка "Настройки" — 100% Pixel-Perfect по нодам Figma:
  * - Desktop (#8:298)
  * - Mobile (#22:1464)
  */
-export const SettingsTab: React.FC = () => {
+export const SettingsTab: React.FC<SettingsTabProps> = ({ onBack }) => {
   const [currencyName, setCurrencyName] = useState("Российский рубль (RUB)");
   const [currencyCode, setCurrencyCode] = useState("RUB");
   const [isCurrencyModalOpen, setIsCurrencyModalOpen] = useState(false);
@@ -27,6 +32,18 @@ export const SettingsTab: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-5 lg:gap-6 w-full max-w-[1064px]">
+      {/* Кнопка возврата в ЛК для мобильной версии */}
+      {onBack && (
+        <button
+          type="button"
+          onClick={onBack}
+          className="lg:hidden flex items-center gap-1.5 text-[14px] font-semibold text-[#0D8C47] hover:underline self-start cursor-pointer -mb-1"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Назад в профиль</span>
+        </button>
+      )}
+
       {/* Заголовок (#8:332 / #22:1464: Inter Bold 24px/28px #14171C) */}
       <h1 className="text-[24px] lg:text-[28px] font-bold text-[#14171C]">
         Настройки
@@ -35,7 +52,7 @@ export const SettingsTab: React.FC = () => {
       {/* SettingsTopRow (#8:359 / #22:1464) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 w-full">
         {/* CardCurrency (#8:362 / #22:1468) */}
-        <div className="w-full bg-white rounded-[14px] lg:rounded-[12px] p-5 lg:p-6 flex flex-col gap-3.5">
+        <div className="w-full bg-white rounded-[14px] lg:rounded-[12px] p-5 lg:p-6 flex flex-col gap-3.5 border border-[#E5E8ED]">
           <h3 className="text-[16px] font-bold text-[#14171C]">
             Основная валюта
           </h3>
@@ -43,7 +60,7 @@ export const SettingsTab: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsCurrencyModalOpen(true)}
-            className="w-full h-[44px] px-3.5 rounded-[8px] bg-[#F2F5F7] hover:bg-[#E5E8ED] flex items-center justify-between text-[13px] font-normal text-[#14171C] transition-colors"
+            className="w-full h-[44px] px-3.5 rounded-[8px] bg-[#F2F5F7] hover:bg-[#E5E8ED] flex items-center justify-between text-[13px] font-normal text-[#14171C] transition-colors cursor-pointer"
           >
             <span>{currencyName}</span>
             <span className="text-[#8C9199] text-xs">▾</span>
@@ -51,7 +68,7 @@ export const SettingsTab: React.FC = () => {
         </div>
 
         {/* CardLanguage (#8:363: visible on desktop) */}
-        <div className="hidden lg:flex w-full bg-white rounded-[12px] p-6 flex-col gap-3.5">
+        <div className="hidden lg:flex w-full bg-white rounded-[12px] p-6 flex-col gap-3.5 border border-[#E5E8ED]">
           <h3 className="text-[16px] font-bold text-[#14171C]">
             Язык интерфейса
           </h3>
@@ -84,7 +101,7 @@ export const SettingsTab: React.FC = () => {
       </div>
 
       {/* NotifCard (#8:360 / #22:1473) */}
-      <div className="w-full bg-white rounded-[14px] lg:rounded-[12px] p-5 lg:p-6 flex flex-col gap-4">
+      <div className="w-full bg-white rounded-[14px] lg:rounded-[12px] p-5 lg:p-6 flex flex-col gap-4 border border-[#E5E8ED]">
         <h3 className="text-[16px] font-bold text-[#14171C]">
           Уведомления
         </h3>
@@ -99,7 +116,7 @@ export const SettingsTab: React.FC = () => {
             <button
               type="button"
               onClick={() => setNotif1(!notif1)}
-              className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors ${
+              className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors cursor-pointer ${
                 notif1 ? "bg-[#0D8C47]" : "bg-[#D9DEE5]"
               }`}
             >
@@ -120,7 +137,7 @@ export const SettingsTab: React.FC = () => {
             <button
               type="button"
               onClick={() => setNotif2(!notif2)}
-              className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors ${
+              className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors cursor-pointer ${
                 notif2 ? "bg-[#0D8C47]" : "bg-[#D9DEE5]"
               }`}
             >
@@ -141,7 +158,7 @@ export const SettingsTab: React.FC = () => {
             <button
               type="button"
               onClick={() => setNotif3(!notif3)}
-              className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors ${
+              className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors cursor-pointer ${
                 notif3 ? "bg-[#0D8C47]" : "bg-[#D9DEE5]"
               }`}
             >
@@ -156,7 +173,7 @@ export const SettingsTab: React.FC = () => {
       </div>
 
       {/* SupportCard (#8:361 / #22:1485) */}
-      <div className="w-full bg-white rounded-[14px] lg:rounded-[12px] p-5 lg:p-6 flex flex-col gap-3">
+      <div className="w-full bg-white rounded-[14px] lg:rounded-[12px] p-5 lg:p-6 flex flex-col gap-3 border border-[#E5E8ED]">
         <h3 className="text-[16px] font-bold text-[#14171C]">
           Поддержка
         </h3>
@@ -165,7 +182,7 @@ export const SettingsTab: React.FC = () => {
           <button
             type="button"
             onClick={() => alert("Открытие чата поддержки...")}
-            className="text-[#0D8C47] font-semibold hover:underline text-left"
+            className="text-[#0D8C47] font-semibold hover:underline text-left cursor-pointer"
           >
             Написать в чат поддержки
           </button>

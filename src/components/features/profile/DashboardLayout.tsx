@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { ArrowLeft } from "lucide-react";
 import { ProfileSidebar, DashboardTab } from "./ProfileSidebar";
 import { ProfileTab } from "./ProfileTab";
 import { HistoryTab } from "./HistoryTab";
@@ -24,6 +25,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<DashboardTab>(initialTab);
 
+  const handleBackToProfile = () => {
+    setActiveTab("profile");
+  };
+
   return (
     <div className="min-h-screen bg-[#F7FAFC] font-sans antialiased flex flex-col lg:flex-row">
       {/* Desktop Sidebar (#5:3: 280px, bg #FFFFFF, border-r 1px solid #E5E8ED) */}
@@ -39,20 +44,43 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         {activeTab === "profile" && (
           <ProfileTab onNavigateToTab={(t) => setActiveTab(t as DashboardTab)} />
         )}
-        {activeTab === "history" && <HistoryTab />}
-        {activeTab === "verification" && <VerificationTab />}
-        {activeTab === "limits" && <LimitsTab />}
-        {activeTab === "security" && (
-          <SecurityTab onNavigateToTab={(t) => setActiveTab(t as DashboardTab)} />
+        {activeTab === "history" && (
+          <HistoryTab onBack={handleBackToProfile} />
         )}
-        {activeTab === "settings" && <SettingsTab />}
-        {activeTab === "documents" && <DocumentsTab />}
+        {activeTab === "verification" && (
+          <VerificationTab onBack={handleBackToProfile} />
+        )}
+        {activeTab === "limits" && (
+          <LimitsTab onBack={handleBackToProfile} />
+        )}
+        {activeTab === "security" && (
+          <SecurityTab
+            onNavigateToTab={(t) => setActiveTab(t as DashboardTab)}
+            onBack={handleBackToProfile}
+          />
+        )}
+        {activeTab === "settings" && (
+          <SettingsTab onBack={handleBackToProfile} />
+        )}
+        {activeTab === "documents" && (
+          <DocumentsTab onBack={handleBackToProfile} />
+        )}
         {activeTab === "support" && (
           <div className="flex flex-col gap-5 lg:gap-6 w-full max-w-[1064px]">
+            {/* Кнопка возврата в ЛК для мобильной версии */}
+            <button
+              type="button"
+              onClick={handleBackToProfile}
+              className="lg:hidden flex items-center gap-1.5 text-[14px] font-semibold text-[#0D8C47] hover:underline self-start cursor-pointer -mb-1"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Назад в профиль</span>
+            </button>
+
             <h1 className="text-[24px] lg:text-[28px] font-bold text-[#14171C]">
               Поддержка
             </h1>
-            <div className="bg-white rounded-[14px] lg:rounded-[12px] p-5 lg:p-6 flex flex-col gap-4">
+            <div className="bg-white rounded-[14px] lg:rounded-[12px] p-5 lg:p-6 flex flex-col gap-4 border border-[#E5E8ED]">
               <p className="text-[14px] text-[#40454D] leading-relaxed">
                 Служба заботы о клиентах MiraMoney работает круглосуточно.
               </p>

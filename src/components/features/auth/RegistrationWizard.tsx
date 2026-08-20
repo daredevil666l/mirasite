@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Check, ChevronDown, Calendar, CheckCircle2 } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Check, Calendar, CheckCircle2 } from "lucide-react";
 
 import { getAssetPath } from "@/lib/utils";
 
@@ -16,10 +17,20 @@ const CITIZENSHIP_OPTIONS = [
   { id: "cn", name: "Китай", flag: getAssetPath("/images/flag_cn.png") },
 ];
 
+export interface RegistrationWizardProps {
+  initialMode?: "login" | "register";
+}
+
 /**
- * 100% Pixel-Perfect визард регистрации по макетам Figma Desktop (#11:655 - #11:755) и Mobile (#11:940 - #13:1029)
+ * 100% Pixel-Perfect визард регистрации и входа по макетам Figma Desktop (#11:655 - #11:755) и Mobile (#11:940 - #13:1029)
  */
-export const RegistrationWizard: React.FC = () => {
+export const RegistrationWizard: React.FC<RegistrationWizardProps> = ({
+  initialMode = "register",
+}) => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const [mode, setMode] = useState<"login" | "register">(initialMode);
   const [step, setStep] = useState<number>(1);
 
   // Поля формы
@@ -52,6 +63,15 @@ export const RegistrationWizard: React.FC = () => {
     useRef<HTMLInputElement>(null),
   ];
   const dateInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (searchParams) {
+      const qMode = searchParams.get("mode");
+      if (qMode === "login" || qMode === "register") {
+        setMode(qMode);
+      }
+    }
+  }, [searchParams]);
 
   // Обратный отсчет таймера для SMS
   useEffect(() => {
@@ -89,6 +109,22 @@ export const RegistrationWizard: React.FC = () => {
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value.replace(/[^a-zA-Zа-яА-ЯёЁ\s-]/g, "");
     setName(val);
+  };
+
+  // Форматирование адреса: Страна, Город, Улица — только текстовый ввод (без цифр)
+  const handleAddressCountryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/[0-9]/g, "");
+    setAddressCountry(val);
+  };
+
+  const handleAddressCityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/[0-9]/g, "");
+    setAddressCity(val);
+  };
+
+  const handleAddressStreetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/[0-9]/g, "");
+    setAddressStreet(val);
   };
 
   // Форматирование номера документа по типу гражданства
@@ -149,6 +185,14 @@ export const RegistrationWizard: React.FC = () => {
         alert("Пожалуйста, введите 4-значный код из SMS");
         return;
       }
+      
+      // Если это флоу ВХОДА (login) -> сразу переход в Личный Кабинет
+      if (mode === "login") {
+        router.push("/dashboard");
+        return;
+      }
+
+      // Если это флоу РЕГИСТРАЦИИ -> переход к следующим шагам
       setStep(3);
     } else if (step === 3) {
       if (!citizenship) {
@@ -166,7 +210,6 @@ export const RegistrationWizard: React.FC = () => {
         return;
       }
       setStep(5);
-
     } else if (step === 5) {
       if (!addressCountry || !addressCity) {
         alert("Пожалуйста, укажите страну и город проживания");
@@ -182,7 +225,14 @@ export const RegistrationWizard: React.FC = () => {
     }
   };
 
-  const progressPercent = step >= 7 ? 100 : Math.round((step / 6) * 100);
+  const isLoginMode = mode === "login";
+  const progressPercent = isLoginMode
+    ? step === 1
+      ? 50
+      : 100
+    : step >= 7
+    ? 100
+    : Math.round((step / 6) * 100);
 
   return (
     <div className="min-h-screen w-full bg-[#F7FAFC] sm:bg-[#F7FAFC] flex items-center justify-center p-0 sm:p-6 lg:p-10 font-sans antialiased">
@@ -210,9 +260,13 @@ export const RegistrationWizard: React.FC = () => {
           />
         </div>
 
-        {/* Шаг N из 6 (#11:660: Inter SemiBold 12px, #8C9199) */}
+        {/* Шаг N из N (#11:660: Inter SemiBold 12px, #8C9199) */}
         <span className="text-[12px] font-semibold text-[#8C9199] -mt-1">
-          {step <= 6 ? `Шаг ${step} из 6` : "Регистрация завершена"}
+          {isLoginMode
+            ? `Шаг ${step} из 2`
+            : step <= 6
+            ? `Шаг ${step} из 6`
+            : "Регистрация завершена"}
         </span>
 
         {/* ================= ШАГ 1: Телефон (#11:655 / #11:940) ================= */}
@@ -220,10 +274,12 @@ export const RegistrationWizard: React.FC = () => {
           <div className="flex flex-col gap-5">
             <div className="flex flex-col gap-1.5">
               <h1 className="text-[21px] sm:text-[24px] font-bold text-[#14171C]">
-                Регистрация и вход
+                {isLoginMode ? "Вход в личный кабинет" : "Регистрация"}
               </h1>
               <p className="text-[14px] text-[#666B73] leading-relaxed">
-                Укажите номер телефона — на него придёт код для входа в личный кабинет
+                {isLoginMode
+                  ? "Укажите номер телефона — на него придёт код для входа в личный кабинет"
+                  : "Укажите номер телефона — на него придёт код подтверждения для регистрации"}
               </p>
             </div>
 
@@ -246,10 +302,37 @@ export const RegistrationWizard: React.FC = () => {
             <button
               type="button"
               onClick={handleNextStep}
-              className="w-full h-[50px] bg-[#0D8C47] hover:bg-[#0D6638] text-white text-[15px] font-semibold rounded-[10px] flex items-center justify-center transition-colors shadow-sm active:scale-[0.98] mt-1"
+              className="w-full h-[50px] bg-[#0D8C47] hover:bg-[#0D6638] text-white text-[15px] font-semibold rounded-[10px] flex items-center justify-center transition-colors shadow-sm active:scale-[0.98] mt-1 cursor-pointer"
             >
               Отправить код
             </button>
+
+            {/* Переключение режима Вход <-> Регистрация */}
+            <div className="text-center pt-1">
+              {isLoginMode ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode("register");
+                    setStep(1);
+                  }}
+                  className="text-[13px] text-[#0D8C47] font-semibold hover:underline cursor-pointer"
+                >
+                  Нет аккаунта? Зарегистрироваться
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode("login");
+                    setStep(1);
+                  }}
+                  className="text-[13px] text-[#0D8C47] font-semibold hover:underline cursor-pointer"
+                >
+                  Уже есть аккаунт? Войти
+                </button>
+              )}
+            </div>
           </div>
         )}
 
@@ -282,13 +365,13 @@ export const RegistrationWizard: React.FC = () => {
               ))}
             </div>
 
-            {/* SubmitButton (#11:686: "Подтвердить") */}
+            {/* SubmitButton (#11:686: "Подтвердить" / "Войти") */}
             <button
               type="button"
               onClick={handleNextStep}
-              className="w-full h-[50px] bg-[#0D8C47] hover:bg-[#0D6638] text-white text-[15px] font-semibold rounded-[10px] flex items-center justify-center transition-colors shadow-sm active:scale-[0.98]"
+              className="w-full h-[50px] bg-[#0D8C47] hover:bg-[#0D6638] text-white text-[15px] font-semibold rounded-[10px] flex items-center justify-center transition-colors shadow-sm active:scale-[0.98] cursor-pointer"
             >
-              Подтвердить
+              {isLoginMode ? "Войти" : "Подтвердить"}
             </button>
 
             {/* Таймер повторной отправки (#11:688) */}
@@ -313,8 +396,8 @@ export const RegistrationWizard: React.FC = () => {
           </div>
         )}
 
-        {/* ================= ШАГ 3: Гражданство (#11:689 / #13:971) ================= */}
-        {step === 3 && (
+        {/* ================= ШАГ 3: Гражданство (Только для Регистрации) ================= */}
+        {!isLoginMode && step === 3 && (
           <div className="flex flex-col gap-5">
             <div className="flex flex-col gap-1.5">
               <h1 className="text-[21px] sm:text-[24px] font-bold text-[#14171C]">
@@ -330,7 +413,7 @@ export const RegistrationWizard: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
-                className="w-full h-[50px] px-4 rounded-[10px] bg-[#F2F5F7] hover:bg-[#E5E8ED] transition-colors flex items-center justify-between text-left focus:outline-none"
+                className="w-full h-[50px] px-4 rounded-[10px] bg-[#F2F5F7] hover:bg-[#E5E8ED] transition-colors flex items-center justify-between text-left focus:outline-none cursor-pointer"
               >
                 <span className={`text-[15px] font-medium ${citizenship ? "text-[#14171C]" : "text-[#8C9199]"}`}>
                   {citizenship || "Выберите страну"}
@@ -374,15 +457,15 @@ export const RegistrationWizard: React.FC = () => {
             <button
               type="button"
               onClick={handleNextStep}
-              className="w-full h-[50px] bg-[#0D8C47] hover:bg-[#0D6638] text-white text-[15px] font-semibold rounded-[10px] flex items-center justify-center transition-colors shadow-sm active:scale-[0.98] mt-1"
+              className="w-full h-[50px] bg-[#0D8C47] hover:bg-[#0D6638] text-white text-[15px] font-semibold rounded-[10px] flex items-center justify-center transition-colors shadow-sm active:scale-[0.98] mt-1 cursor-pointer"
             >
               Продолжить
             </button>
           </div>
         )}
 
-        {/* ================= ШАГ 4: Паспортные данные (#11:710 / #13:990) ================= */}
-        {step === 4 && (
+        {/* ================= ШАГ 4: Паспортные данные (Только для Регистрации) ================= */}
+        {!isLoginMode && step === 4 && (
           <div className="flex flex-col gap-5">
             <div className="flex flex-col gap-1.5">
               <h1 className="text-[21px] sm:text-[24px] font-bold text-[#14171C]">
@@ -446,24 +529,22 @@ export const RegistrationWizard: React.FC = () => {
                   />
                   <Calendar className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8C9199] pointer-events-none" />
                 </div>
-
               </div>
             </div>
-
 
             {/* SubmitButton (#11:733: "Продолжить") */}
             <button
               type="button"
               onClick={handleNextStep}
-              className="w-full h-[50px] bg-[#0D8C47] hover:bg-[#0D6638] text-white text-[15px] font-semibold rounded-[10px] flex items-center justify-center transition-colors shadow-sm active:scale-[0.98] mt-1"
+              className="w-full h-[50px] bg-[#0D8C47] hover:bg-[#0D6638] text-white text-[15px] font-semibold rounded-[10px] flex items-center justify-center transition-colors shadow-sm active:scale-[0.98] mt-1 cursor-pointer"
             >
               Продолжить
             </button>
           </div>
         )}
 
-        {/* ================= ШАГ 5: Адрес проживания (#11:735 / #13:1012) ================= */}
-        {step === 5 && (
+        {/* ================= ШАГ 5: Адрес проживания (Только текст в Страна, Город, Улица) ================= */}
+        {!isLoginMode && step === 5 && (
           <div className="flex flex-col gap-5">
             <div className="flex flex-col gap-1.5">
               <h1 className="text-[21px] sm:text-[24px] font-bold text-[#14171C]">
@@ -474,21 +555,21 @@ export const RegistrationWizard: React.FC = () => {
               </p>
             </div>
 
-            {/* 4 поля 2x2 (#11:743, #11:748: Страна, Город, Улица, Дом, квартира) */}
+            {/* 4 поля 2x2: Страна (текст), Город (текст), Улица (текст), Дом, квартира (с цифрами) */}
             <div className="flex flex-col gap-3">
               <div className="grid grid-cols-2 gap-3">
                 <input
                   type="text"
                   placeholder="Страна"
                   value={addressCountry}
-                  onChange={(e) => setAddressCountry(e.target.value)}
+                  onChange={handleAddressCountryChange}
                   className="w-full h-[50px] rounded-[10px] bg-[#F2F5F7] px-4 text-[14px] font-medium text-[#14171C] placeholder-[#8C9199] focus:bg-white focus:ring-2 focus:ring-[#0D8C47] focus:outline-none transition-all"
                 />
                 <input
                   type="text"
                   placeholder="Город"
                   value={addressCity}
-                  onChange={(e) => setAddressCity(e.target.value)}
+                  onChange={handleAddressCityChange}
                   className="w-full h-[50px] rounded-[10px] bg-[#F2F5F7] px-4 text-[14px] font-medium text-[#14171C] placeholder-[#8C9199] focus:bg-white focus:ring-2 focus:ring-[#0D8C47] focus:outline-none transition-all"
                 />
               </div>
@@ -498,7 +579,7 @@ export const RegistrationWizard: React.FC = () => {
                   type="text"
                   placeholder="Улица"
                   value={addressStreet}
-                  onChange={(e) => setAddressStreet(e.target.value)}
+                  onChange={handleAddressStreetChange}
                   className="w-full h-[50px] rounded-[10px] bg-[#F2F5F7] px-4 text-[14px] font-medium text-[#14171C] placeholder-[#8C9199] focus:bg-white focus:ring-2 focus:ring-[#0D8C47] focus:outline-none transition-all"
                 />
                 <input
@@ -515,15 +596,15 @@ export const RegistrationWizard: React.FC = () => {
             <button
               type="button"
               onClick={handleNextStep}
-              className="w-full h-[50px] bg-[#0D8C47] hover:bg-[#0D6638] text-white text-[15px] font-semibold rounded-[10px] flex items-center justify-center transition-colors shadow-sm active:scale-[0.98] mt-1"
+              className="w-full h-[50px] bg-[#0D8C47] hover:bg-[#0D6638] text-white text-[15px] font-semibold rounded-[10px] flex items-center justify-center transition-colors shadow-sm active:scale-[0.98] mt-1 cursor-pointer"
             >
               Продолжить
             </button>
           </div>
         )}
 
-        {/* ================= ШАГ 6: Согласие на обработку данных (#11:755 / #13:1029) ================= */}
-        {step === 6 && (
+        {/* ================= ШАГ 6: Согласие на обработку данных (Только для Регистрации) ================= */}
+        {!isLoginMode && step === 6 && (
           <div className="flex flex-col gap-5">
             <div className="flex flex-col gap-1.5">
               <h1 className="text-[21px] sm:text-[24px] font-bold text-[#14171C]">
@@ -582,8 +663,8 @@ export const RegistrationWizard: React.FC = () => {
           </div>
         )}
 
-        {/* ================= ШАГ 7: Экран успеха ================= */}
-        {step === 7 && (
+        {/* ================= ШАГ 7: Экран успеха (Только для Регистрации) ================= */}
+        {!isLoginMode && step === 7 && (
           <div className="flex flex-col items-center text-center gap-5 py-2">
             <div className="w-16 h-16 rounded-full bg-[#E3F7EB] text-[#0D8C47] flex items-center justify-center shadow-xs">
               <CheckCircle2 className="w-9 h-9 stroke-[2.5]" />

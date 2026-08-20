@@ -64,7 +64,7 @@ export const Header: React.FC<HeaderProps> = ({ onStartTransfer }) => {
           {/* Правая часть: Действия (#8:536) */}
           <div className="hidden sm:flex items-center gap-3">
             <Link
-              href="/register"
+              href="/login"
               className="text-[14px] font-semibold text-[#40454D] hover:text-[#0D8C47] transition-colors"
             >
               Войти

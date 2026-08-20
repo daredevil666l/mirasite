@@ -79,7 +79,7 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
 
         <div className="pt-4 border-t border-[#EDF0F2] flex flex-col gap-3">
           <Link
-            href="/register"
+            href="/login"
             onClick={onClose}
             className="w-full h-11 rounded-lg border border-[#CCD1D9] text-[#14171C] font-semibold text-[14px] flex items-center justify-center transition-colors hover:bg-[#F2F5F7]"
           >
